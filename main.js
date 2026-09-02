@@ -81,6 +81,14 @@ function inferLocalDrainNetwork(segments, selected) {
   }).filter((item) => item.distanceM < 45).sort((a, b) => a.distanceM - b.distanceM).slice(0, 6);
   return nearby.map(({ segment, distanceM }) => ({ id: segment.id, label: segment.label, distanceM: Math.round(distanceM), slope: segment.slope, widthM: segment.widthM, depthM: segment.depthM }));
 }
+function deriveTerrainContext(samples, latitude, longitude) {
+  const usable = (samples || []).filter((sample) => Number.isFinite(sample.elevationM));
+  if (usable.length < 9) return null;
+  const centre = usable.reduce((closest, sample) => Math.hypot(sample.latitude - latitude, sample.longitude - longitude) < Math.hypot(closest.latitude - latitude, closest.longitude - longitude) ? sample : closest);
+  const elevations = usable.map((sample) => sample.elevationM);
+  const mean = elevations.reduce((sum, elevation) => sum + elevation, 0) / elevations.length;
+  return { elevationM: centre.elevationM, depressionM: Math.max(0, mean - centre.elevationM), reliefM: Math.max(...elevations) - Math.min(...elevations), sampleCount: usable.length };
+}
 function parseNaturalReport(text) {
   const words = String(text || '').toLowerCase();
   if (!/(?:i see|there is|water is|water level|ankle|knee|wheel|waterlog|inundat)/.test(words)) return null;
@@ -211,13 +219,18 @@ app.whenReady().then(() => {
     const networkIds = new Set([selectedSegment?.id, ...localNetwork.map((segment) => segment.id)].filter(Boolean));
     const completeNetworkLinks = run.segments.filter((segment) => networkIds.has(segment.id) && segment.widthObserved && segment.depthObserved && Number.isFinite(segment.invertStartM) && Number.isFinite(segment.invertEndM));
     const networkSwmm = await runSwmmNetwork({ projectRoot: __dirname, runDirectory: path.join(app.getPath('userData'), 'swmm-runs'), rainMmHr: rainfallMmHr, segments: completeNetworkLinks, surfaceInputs: { imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45 } });
-    const surface = simulateSurfaceSpill({ rainfallMmHr, imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45, elevationM: run.elevation?.elevationM, drainageRisk: risk, swmm: networkSwmm.solved ? networkSwmm : run.swmm, topologyConfidence: selectedSegment?.topology?.confidence || 0, calibration: run.calibration });
-    let raster = null;
+    let elevationGrid = null;
     try {
-      const elevationGrid = await fetchOpenElevationGrid({ latitude, longitude });
+      elevationGrid = await fetchOpenElevationGrid({ latitude, longitude });
+    } catch { /* surface output is withheld below when local terrain is unavailable */ }
+    const terrainContext = deriveTerrainContext(elevationGrid?.samples, latitude, longitude);
+    const drainContext = selectedSegment ? { observed: Boolean(selectedSegment.widthObserved && selectedSegment.depthObserved && Number.isFinite(selectedSegment.invertStartM) && Number.isFinite(selectedSegment.invertEndM)), distanceM: run.snappedDrain?.snappedDistanceM, capacityIndex: selectedSegment.widthM * selectedSegment.depthM * Math.sqrt(Math.max(.00001, selectedSegment.slope || 0)) } : {};
+    const surface = simulateSurfaceSpill({ rainfallMmHr, imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45, elevationM: terrainContext?.elevationM || run.elevation?.elevationM, drainageRisk: risk, swmm: networkSwmm.solved ? networkSwmm : run.swmm, topologyConfidence: selectedSegment?.topology?.confidence || 0, calibration: run.calibration, terrain: terrainContext || {}, drain: drainContext });
+    let raster = null;
+    if (surface.available && elevationGrid) {
       const terrain = makeRaster({ latitude, longitude, elevationSamples: elevationGrid.samples });
       raster = { ...runRasterSpill({ raster: terrain, rainfallMmHr, imperviousPct: runoff.imperviousPct, drainRemovalMmHr: surface.drainRemovalMmHr }), elevationSource: elevationGrid.source };
-    } catch (error) { raster = { status: 'blocked-elevation-grid-unavailable', error: error.message }; }
+    } else raster = { status: 'withheld-missing-location-inputs', error: surface.missing?.join(', ') || 'Elevation grid unavailable' };
     let streetPhoto = { available: false, source: 'KartaView public street imagery' };
     try { streetPhoto = await fetchKartaViewStreetPhoto({ latitude, longitude }); } catch { /* projection remains available without imagery */ }
     const scenario = { rainfallMmHr, surface, raster, networkSwmm, modelScope: 'Chennai citywide on-demand micro-twin', basis: 'Tier 1: local multi-drain SWMM experiment. Tier 2: deterministic surface-spill raster using sparse public elevation samples.', selectedDrain: run.snappedDrain, localNetwork, runoff, streetPhoto, disclaimer: surface.disclaimer };

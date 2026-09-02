@@ -18,10 +18,16 @@ test('public geometry creates labelled inferred links but no fake confirmed conn
 });
 
 test('surface spill reports a broad exploratory range without calibration labels', () => {
-  const result = simulateSurfaceSpill({ rainfallMmHr: 150, imperviousPct: 75, catchmentAreaHa: .45, drainageRisk: .7, topologyConfidence: .2, calibration: { labelCount: 0, isCalibrated: false } });
+  const result = simulateSurfaceSpill({ rainfallMmHr: 150, imperviousPct: 75, catchmentAreaHa: .45, drainageRisk: .7, topologyConfidence: .2, calibration: { labelCount: 0, isCalibrated: false }, terrain: { depressionM: .18, reliefM: 2.1 }, drain: { observed: true, distanceM: 35, capacityIndex: .018 } });
   assert.equal(result.calibrated, false);
   assert.equal(result.state, 'exploratory-range-not-calibrated');
   assert.ok(result.depthRangeM.high > result.depthRangeM.low);
+});
+
+test('surface spill withholds a generic range when location-specific inputs are absent', () => {
+  const result = simulateSurfaceSpill({ rainfallMmHr: 150, imperviousPct: 75 });
+  assert.equal(result.available, false);
+  assert.match(result.disclaimer, /cannot differentiate/i);
 });
 
 test('daily IMD rainfall without flood labels cannot claim calibration', () => {

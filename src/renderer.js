@@ -194,16 +194,16 @@ async function runScenario(rainfallMmHr) {
   button.disabled = true; button.textContent = 'Running SWMM…'; title.textContent = 'Calculating the scenario…';
   try {
     const result = await window.neer.simulateScenario({ ...scenarioPoint, rainfallMmHr });
-    const scenario = result.scenario; const surface = scenario.surface; const depthCm = Math.round(surface.centralDepthM * 100);
+    const scenario = result.scenario; const surface = scenario.surface; const hasLocationResult = surface.available !== false; const depthCm = hasLocationResult ? Math.round(surface.centralDepthM * 100) : null;
     latestScenario = scenario;
-    const rangeLow = Math.round(surface.depthRangeM.low * 100), rangeHigh = Math.round(surface.depthRangeM.high * 100);
+    const rangeLow = hasLocationResult ? Math.round(surface.depthRangeM.low * 100) : null, rangeHigh = hasLocationResult ? Math.round(surface.depthRangeM.high * 100) : null;
     const water = document.querySelector('#streetWater');
-    water.style.height = `${Math.min(77, 8 + surface.centralDepthM * 78)}%`;
+    water.style.height = hasLocationResult ? `${Math.min(77, 8 + surface.centralDepthM * 78)}%` : '0';
     document.querySelector('#streetScene').classList.toggle('has-water', depthCm > 0);
-    document.querySelector('#streetEmpty').textContent = depthCm ? '' : 'This rainfall scenario does not project standing road water at this point.';
-    title.textContent = depthCm ? `${surface.calibrated ? 'Projected' : 'Illustrative'} road-water range: ${rangeLow}–${rangeHigh} cm` : 'No standing road water projected';
+    document.querySelector('#streetEmpty').textContent = hasLocationResult ? (depthCm ? '' : 'This rainfall scenario does not project standing road water at this point.') : 'Water range withheld until location-specific terrain and drain inputs are available.';
+    title.textContent = !hasLocationResult ? 'This location cannot be differentiated yet' : depthCm ? `${surface.calibrated ? 'Projected' : 'Illustrative'} road-water range: ${rangeLow}–${rangeHigh} cm` : 'No standing road water projected';
     const drain = scenario.selectedDrain;
-    detail.textContent = `${rainfallMmHr} mm/h at ${scenarioPoint.label}. Tier 1 ran SWMM on ${drain?.label || 'the nearest mapped drain'}${drain?.snappedDistanceM != null ? ` (${Math.round(drain.snappedDistanceM)} m away)` : ''}. Tier 2 estimates surface spill after drain headroom. ${scenario.disclaimer}`;
+    detail.textContent = `${rainfallMmHr} mm/h at ${scenarioPoint.label}. Tier 1 ran SWMM on ${drain?.label || 'the nearest mapped drain'}${drain?.snappedDistanceM != null ? ` (${Math.round(drain.snappedDistanceM)} m away)` : ''}. ${hasLocationResult ? `Terrain depression ${surface.terrain.depressionM.toFixed(2)} m; measured drain-capacity index ${surface.drain.capacityIndex.toFixed(3)}. Tier 2 estimates surface spill after drain headroom.` : `Missing: ${(surface.missing || []).join(', ')}.`} ${scenario.disclaimer}`;
     const photo = scenario.streetPhoto;
     const safePhotoUrl = photo?.available && /^https?:\/\//i.test(photo.url || '') ? photo.url : null;
     const scene = document.querySelector('#streetScene');
