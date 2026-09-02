@@ -8,6 +8,11 @@ node_modules/
 .electron-data/
 *.rpt
 *.out
+data/assets/*.tif
+data/assets/*.tiff
+data/assets/*.geojson
+data/imerg/*.csv
+data/calibration/sentinel-flood-labels.geojson
 
 # Local-only SWMM toolchain and build caches
 vendor/toolchain/

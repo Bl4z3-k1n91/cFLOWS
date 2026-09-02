@@ -10,6 +10,7 @@ const { simulateSurfaceSpill } = require('./src/core/surface-spill');
 const { loadCalibrationInputs, buildHistoricalReplay } = require('./src/core/calibration');
 const { makeRaster, runRasterSpill, inspectRasterPoint } = require('./src/core/raster-spill');
 const { saveScenarioRun, listScenarioRuns } = require('./src/core/run-store');
+const { getDataStackStatus, estimateOvertureImperviousness } = require('./src/data/data-stack');
 const { buildOperationalDecision } = require('./src/core/decision');
 const { evidencePacket, askNarrator } = require('./src/core/narrator');
 let latestPilotRun = null;
@@ -115,6 +116,7 @@ async function getCalibrationSnapshot() {
   const inputs = await loadCalibrationInputs({
     rainfallPath: path.join(__dirname, 'data', 'imd', 'rainfall_districtwise_daily_imd.csv'),
     labelsPath: path.join(__dirname, 'data', 'calibration', 'flood-observations.csv'),
+    sentinelLabelsPath: path.join(__dirname, 'data', 'calibration', 'sentinel-flood-labels.geojson'),
   });
   calibrationSnapshot = buildHistoricalReplay(inputs);
   return calibrationSnapshot;
@@ -149,6 +151,7 @@ async function buildPilotRun(liveInputs = {}) {
   const elevation = elevationResult.status === 'fulfilled' ? elevationResult.value : null;
   const newsSignals = newsResult.status === 'fulfilled' ? newsResult.value.map((item) => isFloodNews(item)) : [];
   const calibration = calibrationResult.status === 'fulfilled' ? calibrationResult.value : { status: 'unavailable', labelCount: 0, isCalibrated: false, missing: ['calibration data could not be loaded'] };
+  const dataStack = await getDataStackStatus(__dirname);
   const dataSources = [
     { name: 'GCC storm-water drain GIS', state: drainFeed.state, detail: `${features.length} mapped drain features · ${drainFeed.detail}`, fetchedAt: drainFeed.state === 'live' ? new Date().toISOString() : null },
     { name: 'Current rain + 6-hour forecast', state: rainfall.fresh ? 'live' : 'unavailable', detail: rainfall.source, fetchedAt: rainfall.fetchedAt || null },
@@ -159,6 +162,7 @@ async function buildPilotRun(liveInputs = {}) {
     { name: 'Tide / outfall state', state: 'integration-needed', detail: 'Adapter ready; harbour/tide endpoint required' },
     { name: 'Historic inundation labels', state: 'integration-needed', detail: 'Import NRSC/municipal historical flood layer to calibrate' },
     { name: 'Historical calibration gate', state: calibration.isCalibrated ? 'validated' : 'blocked', detail: calibration.conclusion || 'Calibration evidence unavailable' },
+    ...dataStack.sources.map((source) => ({ name: source.name, state: source.state, detail: `${source.resolution} · ${source.access}` })),
   ];
   const segments = features.map((feature) => {
     const p = feature.properties || {};
@@ -183,7 +187,7 @@ async function buildPilotRun(liveInputs = {}) {
   dataSources.push({ name: 'Hydraulic solver', state: swmm.solved ? 'modelled' : 'blocked', detail: swmm.solved ? `${swmm.engine}: observed GIS geometry + inverts + rain; ${swmm.audit.assumptions.length} assumptions exposed` : `EPA SWMM blocked: ${swmm.error || 'unknown error'}`, fetchedAt: new Date().toISOString() });
   if (swmm.solved) for (const prediction of predictions) prediction.swmm = { engine: swmm.engine, mode: swmm.mode, maxFloodVolumeM3: swmm.maxFloodVolumeM3 };
   const decision = buildOperationalDecision({ rainfall, reports, predictions });
-  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'GCC drain geometry feed', !rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
+  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, dataStack, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'GCC drain geometry feed', !rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
 }
 
 function createWindow() {
@@ -209,8 +213,11 @@ app.whenReady().then(() => {
     const latitude = Number(input.latitude), longitude = Number(input.longitude);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error('Select a location on the scenario map first.');
     const area = { latitude, longitude, label: input.label || 'selected scenario point' };
-    let runoff = { source: 'OpenStreetMap runoff proxy unavailable', buildings: 0, roads: 0, imperviousPct: 70, fresh: false };
-    try { runoff = await fetchOsmRunoffProxy({ latitude, longitude }); } catch { /* conservative fallback is disclosed */ }
+    let runoff = await estimateOvertureImperviousness({ projectRoot: __dirname, latitude, longitude });
+    if (!runoff) {
+      runoff = { source: 'OpenStreetMap runoff proxy unavailable', buildings: 0, roads: 0, imperviousPct: 70, fresh: false };
+      try { runoff = await fetchOsmRunoffProxy({ latitude, longitude }); } catch { /* conservative fallback is disclosed */ }
+    }
     const run = await buildPilotRun({ area, selectedPoint: true, rainfallMmHr, rainfallSourceFresh: false, surfaceInputs: { imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45 } });
     const selectedRisk = run.predictions.find((prediction) => prediction.id === run.snappedDrain?.id) || run.predictions[0];
     const risk = selectedRisk?.floodProbability || 0;

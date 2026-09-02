@@ -5,6 +5,7 @@ const { simulateSurfaceSpill } = require('../src/core/surface-spill');
 const { buildHistoricalReplay } = require('../src/core/calibration');
 const { makeRaster, runRasterSpill, inspectRasterPoint } = require('../src/core/raster-spill');
 const { buildNetworkInp } = require('../src/core/swmm');
+const { getDataStackStatus } = require('../src/data/data-stack');
 
 test('public geometry creates labelled inferred links but no fake confirmed connectivity', () => {
   const segments = [
@@ -50,4 +51,9 @@ test('local SWMM network generator includes every observed local drain link', ()
     { widthM: 1, depthM: 1.1, lengthM: 100, invertStartM: 5.8, invertEndM: 5.6 },
   ] });
   assert.match(inp, /C001/); assert.match(inp, /C002/); assert.match(inp, /experimental local SWMM network/);
+});
+
+test('public data stack reports missing optional high-resolution imports honestly', async () => {
+  const status = await getDataStackStatus(require('os').tmpdir());
+  assert.equal(status.sources.find((source) => source.name === 'Overture buildings + roads').state, 'import-needed');
 });

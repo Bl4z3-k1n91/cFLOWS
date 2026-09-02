@@ -21,10 +21,15 @@ function parseCsvRows(raw) {
   return records.slice(1).map((cells) => Object.fromEntries(headers.map((header, index) => [header, (cells[index] || '').trim()])));
 }
 
-async function loadCalibrationInputs({ rainfallPath, labelsPath }) {
+async function loadCalibrationInputs({ rainfallPath, labelsPath, sentinelLabelsPath }) {
   const rainfallRows = parseCsvRows(await fs.readFile(rainfallPath, 'utf8'));
   let labelRows = [];
   try { labelRows = parseCsvRows(await fs.readFile(labelsPath, 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  if (sentinelLabelsPath) try {
+    const sentinel = JSON.parse(await fs.readFile(sentinelLabelsPath, 'utf8'));
+    const features = sentinel.features || [];
+    labelRows.push(...features.map((feature) => ({ district: feature.properties?.district || 'Chennai', flooded: feature.properties?.flooded ?? true, timestamp: feature.properties?.timestamp || feature.properties?.event_time || null, source: 'Sentinel-1 imported flood extent', confidence: feature.properties?.confidence ?? .7 })).filter((row) => row.timestamp));
+  } catch (error) { if (error.code !== 'ENOENT') throw error; }
   return { rainfallRows, labelRows };
 }
 
