@@ -2,14 +2,23 @@
 
 const GCC_DRAIN_QUERY = 'https://gisgcc.chennaicorporation.gov.in/server/rest/services/GCCDepts/GCC_COLLABORATION_LAYER/MapServer/8/query';
 
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
 async function fetchGccDrainsForEnvelope({ west, south, east, north }) {
   const query = new URLSearchParams({
     where: '1=1', outFields: 'objectid,location,drain_wid,drain_dep,drain_type,status,invert_sp,invert_ep,water_flow',
     geometry: `${west},${south},${east},${north}`, geometryType: 'esriGeometryEnvelope', inSR: '4326', spatialRel: 'esriSpatialRelIntersects', outSR: '4326', f: 'geojson', returnGeometry: 'true',
   });
-  const response = await fetch(`${GCC_DRAIN_QUERY}?${query}`);
-  if (!response.ok) throw new Error(`GCC drain GIS request failed: ${response.status}`);
-  return response.json();
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const signal = AbortSignal.timeout(18_000);
+    try {
+      const response = await fetch(`${GCC_DRAIN_QUERY}?${query}`, { signal, headers: { Accept: 'application/geo+json,application/json;q=0.9,*/*;q=0.8' } });
+      if (!response.ok) throw new Error(`GCC drain GIS request failed: ${response.status}`);
+      return response.json();
+    } catch (error) { lastError = error; if (attempt < 2) await wait(350 * (attempt + 1)); }
+  }
+  throw new Error(`GCC drain GIS unreachable after 3 attempts: ${lastError?.cause?.code || lastError?.message || 'unknown network error'}`);
 }
 
 async function fetchGdeltFloodSignals(query = 'Chennai flood OR waterlogging', maxrecords = 20) {

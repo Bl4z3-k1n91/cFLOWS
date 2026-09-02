@@ -25,6 +25,13 @@ app.setPath('userData', localProfile);
 app.setPath('sessionData', localSession);
 
 const reportPath = () => path.join(app.getPath('userData'), 'field-reports.json');
+const drainCachePath = () => path.join(app.getPath('userData'), 'gcc-drain-cache.json');
+async function readDrainCache() {
+  try { return JSON.parse(await fs.readFile(drainCachePath(), 'utf8')); } catch (error) { return error.code === 'ENOENT' ? null : Promise.reject(error); }
+}
+async function writeDrainCache(geojson) {
+  try { await fs.writeFile(drainCachePath(), JSON.stringify({ cachedAt: new Date().toISOString(), geojson })); } catch { /* cache is an optional resilience layer */ }
+}
 async function readReports() {
   try { return JSON.parse(await fs.readFile(reportPath(), 'utf8')); } catch (error) { return error.code === 'ENOENT' ? [] : Promise.reject(error); }
 }
@@ -108,7 +115,15 @@ async function buildPilotRun(liveInputs = {}) {
   // Bounded pilot envelope: Velachery → Pallikaranai. The GIS service is the
   // authoritative geometry source; missing live observations stay missing.
   const latitude = Number(liveInputs.area?.latitude || 12.9768), longitude = Number(liveInputs.area?.longitude || 80.2205);
-  const drains = await fetchGccDrainsForEnvelope({ west: longitude - .025, south: latitude - .027, east: longitude + .025, north: latitude + .027 });
+  let drains, drainFeed;
+  try {
+    drains = await fetchGccDrainsForEnvelope({ west: longitude - .025, south: latitude - .027, east: longitude + .025, north: latitude + .027 });
+    await writeDrainCache(drains); drainFeed = { state: 'live', detail: 'Public GCC GIS query completed' };
+  } catch (error) {
+    const cached = await readDrainCache();
+    if (cached?.geojson?.features?.length) { drains = cached.geojson; drainFeed = { state: 'cached', detail: `GCC GIS unavailable; using locally cached geometry from ${new Date(cached.cachedAt).toLocaleString()}` }; }
+    else { drains = { type: 'FeatureCollection', features: [] }; drainFeed = { state: 'unavailable', detail: `GCC GIS unavailable; no local cache: ${error.message}` }; }
+  }
   const features = (drains.features || []).slice(0, 2000);
   const reports = await readReports();
   const reportsBySegment = reports.reduce((grouped, report) => {
@@ -127,7 +142,7 @@ async function buildPilotRun(liveInputs = {}) {
   const newsSignals = newsResult.status === 'fulfilled' ? newsResult.value.map((item) => isFloodNews(item)) : [];
   const calibration = calibrationResult.status === 'fulfilled' ? calibrationResult.value : { status: 'unavailable', labelCount: 0, isCalibrated: false, missing: ['calibration data could not be loaded'] };
   const dataSources = [
-    { name: 'GCC storm-water drain GIS', state: 'live', detail: `${features.length} mapped drain features`, fetchedAt: new Date().toISOString() },
+    { name: 'GCC storm-water drain GIS', state: drainFeed.state, detail: `${features.length} mapped drain features · ${drainFeed.detail}`, fetchedAt: drainFeed.state === 'live' ? new Date().toISOString() : null },
     { name: 'Current rain + 6-hour forecast', state: rainfall.fresh ? 'live' : 'unavailable', detail: rainfall.source, fetchedAt: rainfall.fetchedAt || null },
     sourceStatus('Terrain elevation', elevationResult, elevation ? `${elevation.elevationM} m at map focus` : 'Terrain sample unavailable'),
     sourceStatus('Flood and waterlogging news', newsResult, newsSignals.length ? `${newsSignals.length} recent signals; corroboration only` : 'No recent signals'),
@@ -160,7 +175,7 @@ async function buildPilotRun(liveInputs = {}) {
   dataSources.push({ name: 'Hydraulic solver', state: swmm.solved ? 'modelled' : 'blocked', detail: swmm.solved ? `${swmm.engine}: observed GIS geometry + inverts + rain; ${swmm.audit.assumptions.length} assumptions exposed` : `EPA SWMM blocked: ${swmm.error || 'unknown error'}`, fetchedAt: new Date().toISOString() });
   if (swmm.solved) for (const prediction of predictions) prediction.swmm = { engine: swmm.engine, mode: swmm.mode, maxFloodVolumeM3: swmm.maxFloodVolumeM3 };
   const decision = buildOperationalDecision({ rainfall, reports, predictions });
-  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [!rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
+  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'GCC drain geometry feed', !rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
 }
 
 function createWindow() {
