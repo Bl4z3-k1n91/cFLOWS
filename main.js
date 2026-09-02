@@ -210,7 +210,7 @@ app.whenReady().then(() => {
     const selectedSegment = run.segments.find((segment) => segment.id === run.snappedDrain?.id);
     const networkIds = new Set([selectedSegment?.id, ...localNetwork.map((segment) => segment.id)].filter(Boolean));
     const completeNetworkLinks = run.segments.filter((segment) => networkIds.has(segment.id) && segment.widthObserved && segment.depthObserved && Number.isFinite(segment.invertStartM) && Number.isFinite(segment.invertEndM));
-    const networkSwmm = await runSwmmNetwork({ projectRoot: __dirname, runDirectory: path.join(app.getPath('userData'), 'swmm-runs'), rainMmHr, segments: completeNetworkLinks, surfaceInputs: { imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45 } });
+    const networkSwmm = await runSwmmNetwork({ projectRoot: __dirname, runDirectory: path.join(app.getPath('userData'), 'swmm-runs'), rainMmHr: rainfallMmHr, segments: completeNetworkLinks, surfaceInputs: { imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45 } });
     const surface = simulateSurfaceSpill({ rainfallMmHr, imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45, elevationM: run.elevation?.elevationM, drainageRisk: risk, swmm: networkSwmm.solved ? networkSwmm : run.swmm, topologyConfidence: selectedSegment?.topology?.confidence || 0, calibration: run.calibration });
     let raster = null;
     try {
