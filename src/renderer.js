@@ -14,6 +14,8 @@ let scenarioPoint = { latitude: 12.9768, longitude: 80.2205, label: 'Velachery /
 let scenarioRasterOverlay;
 let latestScenario;
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+function setBootDetail(message) { const detail = document.querySelector('#bootDetail'); if (detail) detail.textContent = message; }
+function finishBoot() { document.body.classList.remove('booting'); document.querySelector('#bootScreen')?.remove(); }
 
 function inlineMarkdown(value) {
   return escapeHtml(value)
@@ -95,6 +97,9 @@ function updateDecision(run) {
     card.querySelector('em').textContent = `Next step: ${decision.action || 'wait'} · Confidence ${Math.round((decision.confidence || 0) * 100)}%`;
   }
   const rain = run.rainfall || {};
+  $('#rainAmount').textContent = Number(rain.mmHr || 0).toFixed(1);
+  $('#riskNumber').textContent = String((run.predictions || []).filter((prediction) => prediction.severity === 'critical').length);
+  $('#confidenceValue').textContent = Number(decision.confidence || 0).toFixed(2);
   const guide = document.querySelector('#citizenGuide');
   if (guide) {
     const monitor = decision.state === 'monitor';
@@ -271,6 +276,7 @@ function openReportDialog(latlng) {
 }
 
 function initialiseBasemap() {
+  setBootDetail('Loading the map, then checking public drain geometry and live evidence.');
   mountCitizenGuide();
   const mapNode = document.createElement('div');
   mapNode.id = 'liveMap';
@@ -303,6 +309,7 @@ function initialiseBasemap() {
 async function loadActualDrainNetwork() {
   if (!window.neer || !pilotMap) return;
   try {
+    setBootDetail('Checking GCC drain geometry, rainfall and field reports…');
     const run = await window.neer.runPilot({});
     if (drainOverlay) drainOverlay.remove();
     drainOverlay = window.L.geoJSON(run.geojson, {
@@ -329,8 +336,13 @@ async function loadActualDrainNetwork() {
     $('.map-card h2').textContent = 'Drains near Velachery';
     $('.map-card .card-head p').innerHTML = '<span class="map-live"></span> Real Greater Chennai Corporation drain geometry · pan and zoom to explore';
     updateDecision(run);
-    toast(`${run.drainCount} real GCC drains loaded. ${run.reports.length} local field report(s) in the evidence ledger.`);
+    finishBoot();
+    toast(run.drainFeed?.state === 'unavailable' ? 'GCC geometry is unavailable. The app is in evidence-needed mode.' : `${run.drainCount} GCC drain features ready. ${run.reports.length} local field report(s) in the ledger.`);
   } catch (error) {
+    document.body.classList.add('real-map');
+    $('.page-head h1').textContent = 'Live evidence is unavailable';
+    $('.page-head .subhead').textContent = 'cFLOWS did not receive enough public data to produce a flood answer.';
+    finishBoot();
     $('#simulateButton').textContent = 'GCC GIS unavailable';
     toast(`Could not load GCC drains: ${error.message}`);
   }
