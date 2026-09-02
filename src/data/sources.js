@@ -50,6 +50,21 @@ async function fetchOpenElevation({ latitude, longitude }) {
   return { source: 'Open-Elevation terrain sample', elevationM: elevation, fetchedAt: new Date().toISOString(), fresh: true };
 }
 
+async function fetchOpenElevationGrid({ latitude, longitude, radiusM = 480, count = 5 }) {
+  const points = [];
+  for (let row = 0; row < count; row += 1) for (let col = 0; col < count; col += 1) {
+    const north = radiusM - row * (radiusM * 2 / (count - 1)), east = -radiusM + col * (radiusM * 2 / (count - 1));
+    points.push({ latitude: latitude + north / 110540, longitude: longitude + east / (111320 * Math.cos(latitude * Math.PI / 180)) });
+  }
+  const locations = points.map((point) => `${point.latitude},${point.longitude}`).join('|');
+  const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?${new URLSearchParams({ locations })}`);
+  if (!response.ok) throw new Error(`Elevation grid request failed: ${response.status}`);
+  const results = (await response.json()).results || [];
+  const samples = results.map((result, index) => ({ ...points[index], elevationM: Number(result.elevation) })).filter((point) => Number.isFinite(point.elevationM));
+  if (samples.length < 9) throw new Error('Elevation service returned too few terrain samples for the raster.');
+  return { source: 'Open-Elevation sparse 5×5 terrain samples', samples, radiusM, fresh: true, fetchedAt: new Date().toISOString() };
+}
+
 async function geocodeChennai(place) {
   const query = new URLSearchParams({ q: `${place}, Chennai, Tamil Nadu, India`, format: 'jsonv2', limit: '1' });
   const response = await fetch(`https://nominatim.openstreetmap.org/search?${query}`, { headers: { 'User-Agent': 'cFLOWS-SIH-prototype/0.1' } });
@@ -83,4 +98,4 @@ async function fetchOsmRunoffProxy({ latitude, longitude, radiusM = 220 }) {
   return { source: 'OpenStreetMap buildings + roads', buildings, roads, imperviousPct: Math.max(35, Math.min(92, 35 + buildings * 1.2 + roads * .7)), fresh: true };
 }
 
-module.exports = { fetchGccDrainsForEnvelope, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, fetchOpenMeteoRainfall, fetchOpenElevation, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy, GCC_DRAIN_QUERY };
+module.exports = { fetchGccDrainsForEnvelope, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, fetchOpenMeteoRainfall, fetchOpenElevation, fetchOpenElevationGrid, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy, GCC_DRAIN_QUERY };

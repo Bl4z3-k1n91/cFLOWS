@@ -2,12 +2,14 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fsSync = require('fs');
 const fs = require('fs/promises');
-const { fetchGccDrainsForEnvelope, fetchOpenMeteoRainfall, fetchOpenElevation, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy } = require('./src/data/sources');
+const { fetchGccDrainsForEnvelope, fetchOpenMeteoRainfall, fetchOpenElevation, fetchOpenElevationGrid, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy } = require('./src/data/sources');
 const { predictDrainageNetwork, isFloodNews } = require('./src/core/hydrograph');
-const { runSwmmPrototype } = require('./src/core/swmm');
+const { runSwmmPrototype, runSwmmNetwork } = require('./src/core/swmm');
 const { buildDrainGraph } = require('./src/core/drain-graph');
 const { simulateSurfaceSpill } = require('./src/core/surface-spill');
 const { loadCalibrationInputs, buildHistoricalReplay } = require('./src/core/calibration');
+const { makeRaster, runRasterSpill, inspectRasterPoint } = require('./src/core/raster-spill');
+const { saveScenarioRun, listScenarioRuns } = require('./src/core/run-store');
 const { buildOperationalDecision } = require('./src/core/decision');
 const { evidencePacket, askNarrator } = require('./src/core/narrator');
 let latestPilotRun = null;
@@ -191,12 +193,28 @@ app.whenReady().then(() => {
     const risk = selectedRisk?.floodProbability || 0;
     const localNetwork = inferLocalDrainNetwork(run.segments || [], run.segments?.find((segment) => segment.id === run.snappedDrain?.id));
     const selectedSegment = run.segments.find((segment) => segment.id === run.snappedDrain?.id);
-    const surface = simulateSurfaceSpill({ rainfallMmHr, imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45, elevationM: run.elevation?.elevationM, drainageRisk: risk, swmm: run.swmm, topologyConfidence: selectedSegment?.topology?.confidence || 0, calibration: run.calibration });
+    const networkIds = new Set([selectedSegment?.id, ...localNetwork.map((segment) => segment.id)].filter(Boolean));
+    const completeNetworkLinks = run.segments.filter((segment) => networkIds.has(segment.id) && segment.widthObserved && segment.depthObserved && Number.isFinite(segment.invertStartM) && Number.isFinite(segment.invertEndM));
+    const networkSwmm = await runSwmmNetwork({ projectRoot: __dirname, runDirectory: path.join(app.getPath('userData'), 'swmm-runs'), rainMmHr, segments: completeNetworkLinks, surfaceInputs: { imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45 } });
+    const surface = simulateSurfaceSpill({ rainfallMmHr, imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45, elevationM: run.elevation?.elevationM, drainageRisk: risk, swmm: networkSwmm.solved ? networkSwmm : run.swmm, topologyConfidence: selectedSegment?.topology?.confidence || 0, calibration: run.calibration });
+    let raster = null;
+    try {
+      const elevationGrid = await fetchOpenElevationGrid({ latitude, longitude });
+      const terrain = makeRaster({ latitude, longitude, elevationSamples: elevationGrid.samples });
+      raster = { ...runRasterSpill({ raster: terrain, rainfallMmHr, imperviousPct: runoff.imperviousPct, drainRemovalMmHr: surface.drainRemovalMmHr }), elevationSource: elevationGrid.source };
+    } catch (error) { raster = { status: 'blocked-elevation-grid-unavailable', error: error.message }; }
     let streetPhoto = { available: false, source: 'KartaView public street imagery' };
     try { streetPhoto = await fetchKartaViewStreetPhoto({ latitude, longitude }); } catch { /* projection remains available without imagery */ }
-    return { ...run, scenario: { rainfallMmHr, surface, modelScope: 'Chennai citywide on-demand micro-twin', basis: 'Tier 1: SWMM run on the snapped drain. Tier 2: separate surface-spill balance using runoff proxy and drainage headroom.', selectedDrain: run.snappedDrain, localNetwork, runoff, streetPhoto, disclaimer: surface.disclaimer } };
+    const scenario = { rainfallMmHr, surface, raster, networkSwmm, modelScope: 'Chennai citywide on-demand micro-twin', basis: 'Tier 1: local multi-drain SWMM experiment. Tier 2: deterministic surface-spill raster using sparse public elevation samples.', selectedDrain: run.snappedDrain, localNetwork, runoff, streetPhoto, disclaimer: surface.disclaimer };
+    const saved = await saveScenarioRun(path.join(app.getPath('userData'), 'scenario-runs'), { location: area, scenario: { rainfallMmHr, surface, raster: { status: raster.status, stats: raster.stats, elevationSource: raster.elevationSource }, networkSwmm: { solved: networkSwmm.solved, mode: networkSwmm.mode, linksModelled: networkSwmm.linksModelled, maxFloodVolumeM3: networkSwmm.maxFloodVolumeM3 } }, calibration: run.calibration });
+    return { ...run, scenario: { ...scenario, runId: saved.id } };
   });
   ipcMain.handle('hydrograph:calibration-status', async () => getCalibrationSnapshot());
+  ipcMain.handle('hydrograph:list-scenario-runs', async () => listScenarioRuns(path.join(app.getPath('userData'), 'scenario-runs')));
+  ipcMain.handle('hydrograph:inspect-scenario-point', async (_event, { raster, latitude, longitude } = {}) => {
+    if (!raster?.raster || !Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error('Run a terrain raster scenario, then select a map point.');
+    return inspectRasterPoint(raster, latitude, longitude);
+  });
   ipcMain.handle('hydrograph:add-field-report', async (_event, report) => addReport(report));
   ipcMain.handle('hydrograph:list-field-reports', async () => readReports());
   ipcMain.handle('hydrograph:ask', async (_event, question) => {

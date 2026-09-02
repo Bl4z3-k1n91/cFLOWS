@@ -11,6 +11,8 @@ let swmmCard;
 let scenarioMap;
 let scenarioMarker;
 let scenarioPoint = { latitude: 12.9768, longitude: 80.2205, label: 'Velachery / Pallikaranai' };
+let scenarioRasterOverlay;
+let latestScenario;
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
 
 function inlineMarkdown(value) {
@@ -134,12 +136,43 @@ function mountScenarioView() {
   view.querySelectorAll('[data-rain]').forEach((button) => button.onclick = () => setRain(button.dataset.rain));
   view.querySelector('.scenario-back').onclick = () => setScenarioMode(false);
   view.querySelector('#runScenario').onclick = () => runScenario(Number(slider.value));
+  const controls = view.querySelector('.scenario-controls');
+  const playback = document.createElement('div'); playback.className = 'scenario-playback'; playback.innerHTML = '<b>Flood timeline</b><div><button type="button" id="scenarioPlay">Play</button><input id="scenarioTime" type="range" min="0" max="0" value="0" disabled></div><small id="scenarioTimeLabel">Run a scenario to inspect the first 2 hours.</small><button type="button" id="scenarioExport" disabled>Export evidence JSON</button><button type="button" id="scenarioSaved">Show saved runs</button>';
+  controls.append(playback);
+  playback.querySelector('#scenarioPlay').onclick = () => playScenarioTimeline();
+  playback.querySelector('#scenarioTime').oninput = (event) => paintScenarioFrame(Number(event.target.value));
+  playback.querySelector('#scenarioExport').onclick = () => exportScenarioEvidence();
+  playback.querySelector('#scenarioSaved').onclick = async () => { const runs = await window.neer.listScenarioRuns(); document.querySelector('#streetSource').textContent = runs.length ? `${runs.length} saved scenario run(s). Latest: ${runs[0].location?.label || 'selected location'}, ${runs[0].scenario?.rainfallMmHr} mm/h, ${new Date(runs[0].createdAt).toLocaleString()}.` : 'No saved scenario runs yet.'; };
   scenarioMap = window.L.map('scenarioMap', { zoomControl: true, attributionControl: true }).setView([scenarioPoint.latitude, scenarioPoint.longitude], 13);
   window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(scenarioMap);
   scenarioMarker = window.L.marker([scenarioPoint.latitude, scenarioPoint.longitude], { draggable: true }).addTo(scenarioMap);
-  const selectPoint = (latlng) => { scenarioPoint = { latitude: latlng.lat, longitude: latlng.lng, label: `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}` }; scenarioMarker.setLatLng(latlng); view.querySelector('#scenarioPlace').textContent = scenarioPoint.label; };
+  const selectPoint = async (latlng) => { scenarioPoint = { latitude: latlng.lat, longitude: latlng.lng, label: `${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}` }; scenarioMarker.setLatLng(latlng); view.querySelector('#scenarioPlace').textContent = scenarioPoint.label; if (latestScenario?.raster?.raster) { try { const inspected = await window.neer.inspectScenarioPoint({ raster: latestScenario.raster, latitude: latlng.lat, longitude: latlng.lng }); document.querySelector('#streetSource').textContent = `Point inspection: ${inspected.depthCm} cm in the selected raster cell; terrain ${inspected.elevationM.toFixed(1)} m. ${inspected.note}`; } catch { /* selected location remains usable */ } } };
   scenarioMap.on('click', (event) => selectPoint(event.latlng));
   scenarioMarker.on('dragend', () => selectPoint(scenarioMarker.getLatLng()));
+}
+
+function rasterColour(depth) { if (depth >= .8) return '#b83b4f'; if (depth >= .4) return '#e17755'; if (depth >= .15) return '#eab64e'; if (depth >= .05) return '#43a8b8'; return '#4fc2d022'; }
+function paintScenarioFrame(frameIndex) {
+  const raster = latestScenario?.raster; const map = scenarioMap; if (!raster?.raster || !map || !window.L) return;
+  const frame = raster.frames?.[frameIndex] || raster.frames?.at(-1); if (!frame) return;
+  if (scenarioRasterOverlay) scenarioRasterOverlay.remove();
+  const cells = raster.raster.cells.flat(), cellM = raster.raster.cellM, latitude = raster.raster.latitude;
+  scenarioRasterOverlay = window.L.layerGroup(cells.map((cell, index) => {
+    const latSpan = cellM / 110540 / 2, lonSpan = cellM / (111320 * Math.cos(latitude * Math.PI / 180)) / 2, depth = frame.depthsM[index] || 0;
+    return window.L.rectangle([[cell.latitude - latSpan, cell.longitude - lonSpan], [cell.latitude + latSpan, cell.longitude + lonSpan]], { stroke: false, fillColor: rasterColour(depth), fillOpacity: depth >= .05 ? .47 : .05, interactive: false });
+  })).addTo(map);
+  const label = document.querySelector('#scenarioTimeLabel'); if (label) label.textContent = `${frame.minute} minutes · max ${Math.round((raster.stats?.maxDepthM || 0) * 100)} cm · continuity error ${(raster.stats?.continuityErrorPct || 0).toFixed(2)}%`;
+}
+function playScenarioTimeline() {
+  const raster = latestScenario?.raster; const control = document.querySelector('#scenarioTime'); if (!raster?.frames?.length || !control) return;
+  let index = Number(control.value || 0); const play = document.querySelector('#scenarioPlay'); play.disabled = true;
+  const tick = () => { index = (index + 1) % raster.frames.length; control.value = index; paintScenarioFrame(index); if (index === 0) { play.disabled = false; return; } setTimeout(tick, 460); };
+  tick();
+}
+function exportScenarioEvidence() {
+  if (!latestScenario) return;
+  const payload = { exportedAt: new Date().toISOString(), location: scenarioPoint, runId: latestScenario.runId, rainfallMmHr: latestScenario.rainfallMmHr, surface: latestScenario.surface, networkSwmm: latestScenario.networkSwmm, raster: { status: latestScenario.raster?.status, stats: latestScenario.raster?.stats, elevationSource: latestScenario.raster?.elevationSource }, disclaimer: latestScenario.disclaimer };
+  const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })); link.download = `${payload.runId || 'cflows-scenario'}.json`; link.click(); URL.revokeObjectURL(link.href);
 }
 
 function setScenarioMode(enabled) {
@@ -157,6 +190,7 @@ async function runScenario(rainfallMmHr) {
   try {
     const result = await window.neer.simulateScenario({ ...scenarioPoint, rainfallMmHr });
     const scenario = result.scenario; const surface = scenario.surface; const depthCm = Math.round(surface.centralDepthM * 100);
+    latestScenario = scenario;
     const rangeLow = Math.round(surface.depthRangeM.low * 100), rangeHigh = Math.round(surface.depthRangeM.high * 100);
     const water = document.querySelector('#streetWater');
     water.style.height = `${Math.min(77, 8 + surface.centralDepthM * 78)}%`;
@@ -177,6 +211,9 @@ async function runScenario(rainfallMmHr) {
     document.querySelector('#scenarioValidation').textContent = calibration.isCalibrated
       ? `Calibration check: ${calibration.labelCount} matched labels available. This range is eligible for held-out evaluation.`
       : `Calibration gate: blocked — ${calibration.labelCount || 0} matched flood labels. ${calibration.conclusion || 'Depth accuracy is not claimed.'}`;
+    const time = document.querySelector('#scenarioTime'); const exportButton = document.querySelector('#scenarioExport');
+    if (scenario.raster?.frames?.length) { time.disabled = false; time.max = scenario.raster.frames.length - 1; time.value = scenario.raster.frames.length - 1; paintScenarioFrame(Number(time.value)); }
+    if (exportButton) exportButton.disabled = false;
   } catch (error) { title.textContent = 'Scenario could not run'; detail.textContent = error.message; }
   finally { button.disabled = false; button.textContent = 'Run flood scenario'; }
 }

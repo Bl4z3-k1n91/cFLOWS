@@ -122,6 +122,40 @@ function parseSwmmReport(report) {
   return { flooded, maxFloodVolumeM3: Math.max(0, ...flooded.map((row) => row.volumeM3)), solved: /Analysis begun/i.test(report) && /Analysis ended/i.test(report) };
 }
 
+function buildNetworkInp({ segments = [], rainMmHr = 0, imperviousPct = 70, catchmentAreaHa = .45, runDate = new Date() } = {}) {
+  const usable = segments.filter((segment) => Number(segment.widthM) > 0 && Number(segment.depthM) > 0 && Number(segment.lengthM) > 0 && Number.isFinite(segment.invertStartM) && Number.isFinite(segment.invertEndM)).slice(0, 24);
+  if (!usable.length) throw new Error('No drain links have complete dimensions and invert elevations.');
+  const date = runDate.toISOString().slice(0, 10), rain = Math.max(0, Number(rainMmHr) || 0).toFixed(2);
+  const impervious = Math.max(5, Math.min(98, Number(imperviousPct) || 70)).toFixed(1);
+  const nodes = new Map(), lines = [];
+  for (let index = 0; index < usable.length; index += 1) {
+    const segment = usable[index]; const from = `J${String(index * 2 + 1).padStart(3, '0')}`, to = `J${String(index * 2 + 2).padStart(3, '0')}`;
+    const high = Math.max(segment.invertStartM, segment.invertEndM), low = Math.min(segment.invertStartM, segment.invertEndM);
+    nodes.set(from, high); nodes.set(to, low);
+    lines.push({ id: `C${String(index + 1).padStart(3, '0')}`, from, to, segment });
+  }
+  const junctions = [...nodes].map(([id, elevation]) => `${id.padEnd(7)} ${elevation.toFixed(3)}  1.20 0 0.30 180`).join('\n');
+  const conduits = lines.map(({ id, from, to, segment }) => `${id.padEnd(7)} ${from.padEnd(7)} ${to.padEnd(7)} ${Math.max(20, segment.lengthM).toFixed(1)} 0.018 0 0 0 0`).join('\n');
+  const xsections = lines.map(({ id, segment }) => `${id.padEnd(7)} RECT_OPEN ${Math.max(.3, segment.widthM).toFixed(2)} ${Math.max(.3, segment.depthM).toFixed(2)} 0 0 1`).join('\n');
+  const outlets = lines.map(({ segment }, index) => `O${String(index + 1).padStart(3, '0')} ${(Math.min(segment.invertStartM, segment.invertEndM) - .15).toFixed(3)} FREE NO`).join('\n');
+  const outletLinks = lines.map(({ to, segment }, index) => `X${String(index + 1).padStart(3, '0')} ${to.padEnd(7)} O${String(index + 1).padStart(3, '0')} 10.0 0.018 0 0 0 0`).join('\n');
+  const outletXsections = lines.map((_, index) => `X${String(index + 1).padStart(3, '0')} RECT_OPEN 1.00 1.20 0 0 1`).join('\n');
+  const subcatchments = lines.map(({ from }, index) => `S${String(index + 1).padStart(3, '0')} RG1 ${from} ${(Math.max(.03, catchmentAreaHa / lines.length)).toFixed(3)} ${impervious} 40 0.35 0`).join('\n');
+  const subareas = lines.map((_, index) => `S${String(index + 1).padStart(3, '0')} 0.015 0.22 1.5 4.0 25 OUTLET 100`).join('\n');
+  const infiltration = lines.map((_, index) => `S${String(index + 1).padStart(3, '0')} 48 4 4 7 0`).join('\n');
+  return `[TITLE]\n;; cFLOWS experimental local SWMM network. Candidate connectivity is not surveyed.\n[OPTIONS]\nFLOW_UNITS CMS\nINFILTRATION HORTON\nFLOW_ROUTING DYNWAVE\nSTART_DATE ${date}\nSTART_TIME 00:00:00\nEND_DATE ${date}\nEND_TIME 02:00:00\nREPORT_STEP 00:05:00\nWET_STEP 00:01:00\nROUTING_STEP 0:00:30\nALLOW_PONDING YES\n[RAINGAGES]\nRG1 INTENSITY 0:05 1.0 TIMESERIES RAIN\n[SUBCATCHMENTS]\n${subcatchments}\n[SUBAREAS]\n${subareas}\n[INFILTRATION]\n${infiltration}\n[JUNCTIONS]\n${junctions}\n[OUTFALLS]\n${outlets}\n[CONDUITS]\n${conduits}\n${outletLinks}\n[XSECTIONS]\n${xsections}\n${outletXsections}\n[TIMESERIES]\nRAIN ${date} 00:00 ${rain}\nRAIN ${date} 00:30 ${rain}\nRAIN ${date} 01:00 0\nRAIN ${date} 02:00 0\n[REPORT]\nNODES ALL\nLINKS ALL\n[END]\n`;
+}
+
+async function runSwmmNetwork({ projectRoot, runDirectory, rainMmHr, segments, surfaceInputs = {} }) {
+  const solver = path.join(projectRoot, 'vendor', 'epa-swmm', 'bin', 'runswmm.exe');
+  const stamp = `${Date.now()}-network`; const inputPath = path.join(runDirectory, `${stamp}.inp`), reportPath = path.join(runDirectory, `${stamp}.rpt`), outputPath = path.join(runDirectory, `${stamp}.out`);
+  const audit = { observed: ['rainfall forcing', 'GIS drain geometry', 'drain widths/depths/inverts for included links'], missingObserved: [], assumptions: ['candidate connectivity is inferred, not surveyed', 'subcatchment areas', 'impervious fraction and infiltration', 'roughness', 'outfall/tide boundary'], ready: Boolean(segments?.length) };
+  if (!audit.ready) return { engine: 'EPA SWMM 5.2.4', mode: 'blocked-no-complete-links', solved: false, audit, error: 'No local mapped drain links have all dimensions and inverts.' };
+  await fs.mkdir(runDirectory, { recursive: true }); await fs.writeFile(inputPath, buildNetworkInp({ segments, rainMmHr, ...surfaceInputs }));
+  try { await execFileAsync(solver, [inputPath, reportPath, outputPath], { windowsHide: true, timeout: 35_000 }); const report = await fs.readFile(reportPath, 'utf8'); return { engine: 'EPA SWMM 5.2.4', mode: 'experimental-local-network-inferred-connectivity', inputPath, reportPath, audit, linksModelled: Math.min(24, segments.length), operationalUse: 'not-for-dispatch', ...parseSwmmReport(report) }; }
+  catch (error) { return { engine: 'EPA SWMM 5.2.4', mode: 'unavailable', solved: false, audit, error: error.message }; }
+}
+
 async function runSwmmPrototype({ projectRoot, runDirectory, rainMmHr, representativeDrain = {}, surfaceInputs = {} }) {
   const solver = path.join(projectRoot, 'vendor', 'epa-swmm', 'bin', 'runswmm.exe');
   const stamp = `${Date.now()}-${clean(representativeDrain.id || 'pilot')}`;
@@ -142,4 +176,4 @@ async function runSwmmPrototype({ projectRoot, runDirectory, rainMmHr, represent
   }
 }
 
-module.exports = { buildPrototypeInp, modelInputAudit, parseSwmmReport, runSwmmPrototype };
+module.exports = { buildPrototypeInp, buildNetworkInp, modelInputAudit, parseSwmmReport, runSwmmPrototype, runSwmmNetwork };
