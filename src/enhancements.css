@@ -1,0 +1,19 @@
+.particle-layer circle { filter: drop-shadow(0 0 4px #dcfbff); opacity: .95; }
+#liveMap { position: absolute; inset: 0; z-index: 0; background: #e9efec; }
+.map-svg { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.map-svg > rect { opacity: 0; }
+.map-svg > g[fill="none"], .map-svg .minor-roads { opacity: .10; }
+.map-key, .incident { z-index: 2; }
+.leaflet-control-attribution { font-size: 8px !important; opacity: .72; }
+.critical-pool { animation: poolPulse 2.2s ease-in-out infinite; }
+@keyframes poolPulse { 50% { opacity: .84; } }
+.intervention .pill { background: #eef6f2; color: #397b60; }
+.compare { margin: 0 17px 13px; display: grid; grid-template-columns: 1fr auto; gap: 7px; align-items: center; font-size: 10px; color: var(--mute); }
+.compare b { font: 600 14px 'DM Mono'; color: var(--ink); }
+.compare span:nth-of-type(2), .compare span:nth-of-type(2) + b { border-top: 1px solid var(--line); padding-top: 8px; }
+.compare span:nth-of-type(2) + b { color: var(--green); }
+@media (prefers-reduced-motion: reduce) { .flow-path, .critical-pool { animation: none; } }
+body.real-map .map-svg { display: none; }
+body.real-map .map-toggle[data-layer="depth"], body.real-map .map-toggle[data-layer="flow"], body.real-map .map-toggle[data-layer="assets"], body.real-map .map-key, body.real-map .incident { display: none; }
+.plain-map-card { background: rgba(255,255,255,.96); border: 1px solid #e4e4e7; border-radius: 8px; padding: 11px 12px; box-shadow: 0 5px 18px rgba(24,24,27,.12); max-width: 255px; color: #18181b; font: 12px Inter,Arial,sans-serif; }
+.plain-map-card b { display: block; font-size: 13px; margin-bottom: 4px; }.plain-map-card p { color: #71717a; line-height: 1.4; margin: 0; }.plain-map-card em { display: inline-block; color: #397b60; font-style: normal; font-size: 10px; margin-top: 8px; }

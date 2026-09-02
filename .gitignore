@@ -1,0 +1,21 @@
+# Dependencies and credentials
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Electron runtime data and generated model runs
+.electron-data/
+*.rpt
+*.out
+
+# Local-only SWMM toolchain and build caches
+vendor/toolchain/
+vendor/swmm524-x64-setup.exe
+vendor/epa-swmm/bin/
+vendor/epa-swmm/zig-cache-local/
+vendor/epa-swmm/.vs/
+
+# Operating system files
+Thumbs.db
+.DS_Store

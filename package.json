@@ -1,0 +1,17 @@
+{
+  "name": "cflows",
+  "version": "0.1.0",
+  "description": "cFLOWS — Chennai Flows urban flood nowcasting twin",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --in-process-gpu",
+    "build:swmm": "cmd.exe /d /c scripts\\build-swmm.cmd",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "electron": "^37.2.1"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  }
+}
