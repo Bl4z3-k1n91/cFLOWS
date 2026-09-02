@@ -9,6 +9,9 @@ It is deliberately honest about its limits: public geometry is not a surveyed, c
 - A Chennai map with public drain geometry and click-to-inspect flow context.
 - Plain-language flood questions via a local FreeLLMAPI-compatible endpoint.
 - A scenario workspace: choose a place, set rainfall intensity, inspect the nearest mapped drain, and see an uncertainty-labelled street water projection.
+- A drain-graph builder that records inferred endpoint links with confidence, while keeping confirmed survey topology separate.
+- A historical calibration gate: IMD rainfall is replayed as event evidence, but depth accuracy stays blocked until time-matched flood labels and sub-daily rainfall are supplied.
+- A two-tier scenario model: EPA SWMM for the selected drain reach, followed by an explicit surface-spill balance for the street-water range.
 - Evidence ledger and data-source status rather than made-up sensor coverage.
 - EPA SWMM runs that stop when essential drain dimensions or invert levels are missing.
 
@@ -30,9 +33,9 @@ npm run build:swmm
 
 ## Data and modelling boundary
 
-The app fetches public sources on demand. A location is matched to the nearest drain geometry in the GCC GIS layer; candidate neighboring drains are inferred from endpoint proximity, which is not the same as a surveyed topology. The model exposes that uncertainty rather than treating inferred connections as verified.
+The app fetches public sources on demand. A location is matched to the nearest drain geometry in the GCC GIS layer; candidate neighboring drains are inferred from endpoint proximity and compatible invert direction, which is not the same as a surveyed topology. The model exposes that uncertainty rather than treating inferred connections as verified.
 
-Historical IMD rainfall and public field reports are retained as evidence inputs. Rainfall alone cannot validate flood depth; defensible calibration also needs time-matched flood-depth observations, inundation extents, and confirmed drain connectivity.
+Historical IMD rainfall and public field reports are retained as evidence inputs. Rainfall alone cannot validate flood depth; defensible calibration also needs time-matched flood-depth observations, inundation extents, and confirmed drain connectivity. The import contract for historical labels is documented in `data/calibration/README.md`.
 
 ## Repository layout
 

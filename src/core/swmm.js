@@ -23,11 +23,13 @@ function modelInputAudit(input = {}) {
   return { observed: measured.filter(([, present]) => present).map(([name]) => name), missingObserved: measured.filter(([, present]) => !present).map(([name]) => name), assumptions, ready: measured.every(([, present]) => present) };
 }
 
-function buildPrototypeInp({ rainMmHr = 0, widthM = .6, depthM = .75, lengthM = 120, invertStartM, invertEndM, runDate = new Date() } = {}) {
+function buildPrototypeInp({ rainMmHr = 0, widthM = .6, depthM = .75, lengthM = 120, invertStartM, invertEndM, imperviousPct = 82, catchmentAreaHa = .45, runDate = new Date() } = {}) {
   const width = Math.max(.3, Number(widthM) || .6).toFixed(2);
   const depth = Math.max(.3, Number(depthM) || .75).toFixed(2);
   const length = Math.max(20, Number(lengthM) || 120).toFixed(1);
   const rain = Math.max(0, Number(rainMmHr) || 0).toFixed(2);
+  const impervious = Math.max(5, Math.min(98, Number(imperviousPct) || 82)).toFixed(1);
+  const catchmentArea = Math.max(.05, Math.min(3, Number(catchmentAreaHa) || .45)).toFixed(2);
   const date = runDate.toISOString().slice(0, 10);
   const highInvert = Math.max(Number(invertStartM), Number(invertEndM));
   const lowInvert = Math.min(Number(invertStartM), Number(invertEndM));
@@ -62,7 +64,7 @@ RG1              INTENSITY 0:05     1.0      TIMESERIES RAIN
 
 [SUBCATCHMENTS]
 ;;Name  RainGage Outlet Area   %Imperv Width  %Slope  CurbLen SnowPack
-S1      RG1      J1     0.45   82      65     0.35    0
+S1      RG1      J1     ${catchmentArea}   ${impervious}      65     0.35    0
 
 [SUBAREAS]
 ;;Subcatchment N-Imperv N-Perv S-Imperv S-Perv %Zero RouteTo PctRouted
@@ -120,14 +122,14 @@ function parseSwmmReport(report) {
   return { flooded, maxFloodVolumeM3: Math.max(0, ...flooded.map((row) => row.volumeM3)), solved: /Analysis begun/i.test(report) && /Analysis ended/i.test(report) };
 }
 
-async function runSwmmPrototype({ projectRoot, runDirectory, rainMmHr, representativeDrain = {} }) {
+async function runSwmmPrototype({ projectRoot, runDirectory, rainMmHr, representativeDrain = {}, surfaceInputs = {} }) {
   const solver = path.join(projectRoot, 'vendor', 'epa-swmm', 'bin', 'runswmm.exe');
   const stamp = `${Date.now()}-${clean(representativeDrain.id || 'pilot')}`;
   const inputPath = path.join(runDirectory, `${stamp}.inp`);
   const reportPath = path.join(runDirectory, `${stamp}.rpt`);
   const outputPath = path.join(runDirectory, `${stamp}.out`);
   await fs.mkdir(runDirectory, { recursive: true });
-  const input = { rainMmHr, ...representativeDrain };
+  const input = { rainMmHr, ...surfaceInputs, ...representativeDrain };
   const audit = modelInputAudit(input);
   if (!audit.ready) return { engine: 'EPA SWMM 5.2.4', mode: 'blocked-missing-observed-input', solved: false, audit, error: `Cannot create a physical SWMM run without: ${audit.missingObserved.join(', ')}` };
   await fs.writeFile(inputPath, buildPrototypeInp(input));
