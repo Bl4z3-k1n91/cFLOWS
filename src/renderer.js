@@ -210,7 +210,10 @@ async function runScenario(rainfallMmHr) {
     scene.classList.toggle('has-photo', Boolean(safePhotoUrl));
     scene.style.backgroundImage = safePhotoUrl ? `linear-gradient(rgba(8,36,40,.08), rgba(8,36,40,.08)), url("${safePhotoUrl.replace(/"/g, '%22')}")` : '';
     const graph = result.graph?.summary || {}; const topology = drain?.topology;
-    const networkText = `${scenario.modelScope}; ${graph.inferredLinks || 0} inferred links across this map window, ${graph.confirmedLinks || 0} confirmed public links. This drain's topology confidence: ${Math.round((topology?.confidence || 0) * 100)}%. Built-form runoff proxy: ${Math.round(scenario.runoff?.imperviousPct || 0)}% impervious.`;
+    const context = scenario.cityContext || {};
+    const marine = scenario.marineBoundary;
+    const boundaryText = context.catchment ? `${context.catchment}; regional outfall context: ${context.outfall} (${Math.round((context.outfallDistanceM || 0) / 100) / 10} km away). ${marine ? `Offshore sea-level boundary is ${marine.outfallRestriction}; it reduces assumed drain headroom to ${Math.round((marine.capacityMultiplier || 1) * 100)}%.` : 'No marine boundary was available.'}` : 'No regional Chennai drainage corridor was assigned for this point.';
+    const networkText = `${scenario.modelScope}; ${graph.inferredLinks || 0} inferred links across this map window, ${graph.confirmedLinks || 0} confirmed public links. This drain's topology confidence: ${Math.round((topology?.confidence || 0) * 100)}%. Built-form runoff proxy: ${Math.round(scenario.runoff?.imperviousPct || 0)}% impervious. ${boundaryText} ${context.connection || ''}`;
     source.textContent = photo?.available ? `Public KartaView street photo available nearby (${photo.distanceM ? `${Math.round(photo.distanceM)} m` : 'distance unknown'}). ${networkText}` : `No public street photo is available nearby. ${networkText}`;
     const calibration = result.calibration || {};
     document.querySelector('#scenarioValidation').textContent = calibration.isCalibrated

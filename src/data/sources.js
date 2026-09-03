@@ -1,6 +1,7 @@
 'use strict';
 
 const GCC_DRAIN_QUERY = 'https://gisgcc.chennaicorporation.gov.in/server/rest/services/GCCDepts/GCC_COLLABORATION_LAYER/MapServer/8/query';
+const CFM_BASE_URL = 'https://chennaifloodmonitor.tn.gov.in';
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -48,6 +49,34 @@ async function fetchOpenMeteoRainfall({ latitude = 12.9768, longitude = 80.2205 
   const ageMs = observedAt ? Date.now() - new Date(observedAt).getTime() : Infinity;
   const forecast = (payload.hourly?.time || []).slice(0, 6).map((time, index) => ({ time, mm: Number(payload.hourly?.precipitation?.[index] || 0), probability: Number(payload.hourly?.precipitation_probability?.[index] || 0), weatherCode: payload.hourly?.weather_code?.[index] }));
   return { source: 'Open-Meteo current precipitation', mmHr: Number(payload.current?.precipitation || payload.current?.rain || 0), weatherCode: payload.current?.weather_code, forecast, observedAt, fetchedAt: new Date().toISOString(), fresh: ageMs >= -15 * 60 * 1000 && ageMs <= 45 * 60 * 1000 };
+}
+
+async function fetchCfmForecastRuns() {
+  const response = await fetch(`${CFM_BASE_URL}/Master/GetRun_Deteministic?source=ECMWF&controlormax=Control`, {
+    headers: { Referer: `${CFM_BASE_URL}/HomePage/Dashboard`, 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json, text/javascript, */*; q=0.01' },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error(`CFM public forecast-run request failed: ${response.status}`);
+  const raw = await response.json();
+  const runs = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  if (!Array.isArray(runs) || !runs.length) throw new Error('CFM returned no forecast runs.');
+  return { source: 'Tamil Nadu CFM-DSS public ECMWF run catalogue', latestRun: runs[0], runs: runs.slice(0, 12), fetchedAt: new Date().toISOString(), fresh: true, access: 'public catalogue; station-value endpoint is separately access-controlled' };
+}
+
+async function fetchChennaiMarineBoundary() {
+  // Offshore grid cell, not a harbour gauge. This is useful only as a modelled
+  // downstream boundary signal and is deliberately never presented as observed tide.
+  const params = new URLSearchParams({ latitude: '13.05', longitude: '80.32', current: 'sea_level_height_msl', hourly: 'sea_level_height_msl', forecast_hours: '6', timezone: 'Asia/Kolkata' });
+  const response = await fetch(`https://marine-api.open-meteo.com/v1/marine?${params}`, { signal: AbortSignal.timeout(15_000) });
+  if (!response.ok) throw new Error(`Marine boundary request failed: ${response.status}`);
+  const payload = await response.json();
+  const levelM = Number(payload.current?.sea_level_height_msl);
+  const hourly = (payload.hourly?.time || []).slice(0, 6).map((time, index) => ({ time, levelM: Number(payload.hourly?.sea_level_height_msl?.[index]) })).filter((item) => Number.isFinite(item.levelM));
+  if (!Number.isFinite(levelM) && !hourly.length) throw new Error('Marine boundary response had no sea-level values.');
+  const values = [levelM, ...hourly.map((item) => item.levelM)].filter(Number.isFinite);
+  const low = Math.min(...values), high = Math.max(...values);
+  const position = Number.isFinite(levelM) && high > low ? (levelM - low) / (high - low) : .5;
+  return { source: 'Open-Meteo marine model sea-level boundary', observed: false, levelM: Number.isFinite(levelM) ? levelM : hourly[0]?.levelM, nextSixHours: hourly, restriction: 'offshore model grid; not a Chennai harbour gauge or navigation tide', outfallRestriction: position >= .7 ? 'elevated' : position <= .3 ? 'favourable' : 'neutral', capacityMultiplier: position >= .7 ? .78 : position <= .3 ? 1 : .9, fetchedAt: new Date().toISOString(), fresh: true };
 }
 
 async function fetchOpenElevation({ latitude, longitude }) {
@@ -107,4 +136,4 @@ async function fetchOsmRunoffProxy({ latitude, longitude, radiusM = 220 }) {
   return { source: 'OpenStreetMap buildings + roads', buildings, roads, imperviousPct: Math.max(35, Math.min(92, 35 + buildings * 1.2 + roads * .7)), fresh: true };
 }
 
-module.exports = { fetchGccDrainsForEnvelope, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, fetchOpenMeteoRainfall, fetchOpenElevation, fetchOpenElevationGrid, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy, GCC_DRAIN_QUERY };
+module.exports = { fetchGccDrainsForEnvelope, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, fetchOpenMeteoRainfall, fetchCfmForecastRuns, fetchChennaiMarineBoundary, fetchOpenElevation, fetchOpenElevationGrid, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy, GCC_DRAIN_QUERY };

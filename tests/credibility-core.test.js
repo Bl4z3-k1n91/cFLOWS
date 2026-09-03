@@ -2,7 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { buildDrainGraph } = require('../src/core/drain-graph');
 const { simulateSurfaceSpill } = require('../src/core/surface-spill');
-const { buildHistoricalReplay } = require('../src/core/calibration');
+const { buildHistoricalReplay, evaluateHindcasts } = require('../src/core/calibration');
+const { resolveChennaiContext } = require('../src/core/chennai-context');
 const { makeRaster, runRasterSpill, inspectRasterPoint } = require('../src/core/raster-spill');
 const { buildNetworkInp } = require('../src/core/swmm');
 const { getDataStackStatus } = require('../src/data/data-stack');
@@ -35,6 +36,29 @@ test('daily IMD rainfall without flood labels cannot claim calibration', () => {
   const result = buildHistoricalReplay({ rainfallRows: [{ DISTRICT: 'Chennai', DATE: '2026-09-01', 'DAILY ACTUAL': '12.5' }], labelRows: [] });
   assert.equal(result.isCalibrated, false);
   assert.match(result.conclusion, /not flood-depth calibration/i);
+});
+
+test('hindcast evaluator withholds metrics until it has enough held-out events', () => {
+  const result = evaluateHindcasts([{ observed_flooded: 'true', predicted_flooded: 'true' }]);
+  assert.equal(result.status, 'blocked-insufficient-held-out-events');
+  assert.equal(result.metrics, null);
+});
+
+test('hindcast evaluator reports reproducible event metrics once the held-out gate is met', () => {
+  const rows = Array.from({ length: 20 }, (_, index) => ({ observed_flooded: index < 10 ? 'true' : 'false', predicted_flooded: index < 8 || index === 10 ? 'true' : 'false', depth_m: index < 10 ? '.4' : '', predicted_depth_m: index < 10 ? '.3' : '' }));
+  const result = evaluateHindcasts(rows);
+  assert.equal(result.status, 'evaluated-held-out-events');
+  assert.equal(result.metrics.confusion.tp, 8);
+  assert.equal(result.metrics.confusion.fn, 2);
+  assert.equal(result.metrics.confusion.fp, 1);
+  assert.ok(Math.abs(result.metrics.depthMaeM - .1) < 1e-9);
+});
+
+test('regional Chennai context exposes an outfall hypothesis without claiming pipe connectivity', () => {
+  const result = resolveChennaiContext({ latitude: 12.9768, longitude: 80.2205, marineBoundary: { source: 'marine model', levelM: .2, outfallRestriction: 'elevated', observed: false } });
+  assert.match(result.catchment, /Pallikaranai/);
+  assert.match(result.connection, /does not prove/i);
+  assert.equal(result.marineBoundary.observed, false);
 });
 
 test('deterministic sparse-terrain raster conserves rainfall within numerical tolerance', () => {

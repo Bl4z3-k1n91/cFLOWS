@@ -1,0 +1,2 @@
+timestamp,district,latitude,longitude,observed_flooded,depth_m,predicted_flooded,predicted_depth_m,source,event_id
+2023-12-04T08:30:00+05:30,Chennai,12.9768,80.2205,true,0.42,true,0.38,Replace with a verified field, municipal, or satellite observation,Michaung-example

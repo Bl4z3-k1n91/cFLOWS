@@ -33,6 +33,19 @@ async function loadCalibrationInputs({ rainfallPath, labelsPath, sentinelLabelsP
   return { rainfallRows, labelRows };
 }
 
+function evaluateHindcasts(rows = []) {
+  const usable = rows.filter((row) => /^(true|false|yes|no|0|1)$/i.test(String(row.observed_flooded ?? row.flooded ?? '')) && /^(true|false|yes|no|0|1)$/i.test(String(row.predicted_flooded ?? '')));
+  if (usable.length < 20) return { status: 'blocked-insufficient-held-out-events', eventCount: usable.length, metrics: null, conclusion: 'At least 20 held-out, time-matched observed flood events are required before publishing performance metrics.' };
+  const truth = (row) => /true|yes|1/i.test(String(row.observed_flooded ?? row.flooded));
+  const predicted = (row) => /true|yes|1/i.test(String(row.predicted_flooded));
+  let tp = 0, fp = 0, tn = 0, fn = 0;
+  for (const row of usable) { if (truth(row) && predicted(row)) tp += 1; else if (!truth(row) && predicted(row)) fp += 1; else if (truth(row)) fn += 1; else tn += 1; }
+  const numericDepth = (value) => value !== '' && value != null && Number.isFinite(Number(value)) ? Number(value) : null;
+  const depthPairs = usable.map((row) => [numericDepth(row.predicted_depth_m), numericDepth(row.depth_m ?? row.observed_depth_m)]).filter(([prediction, observed]) => prediction != null && observed != null);
+  const maeM = depthPairs.length ? depthPairs.reduce((sum, [prediction, observed]) => sum + Math.abs(prediction - observed), 0) / depthPairs.length : null;
+  return { status: 'evaluated-held-out-events', eventCount: usable.length, metrics: { precision: tp + fp ? tp / (tp + fp) : null, recall: tp + fn ? tp / (tp + fn) : null, falseAlarmRate: fp + tn ? fp / (fp + tn) : null, depthMaeM: maeM, depthSampleCount: depthPairs.length, confusion: { tp, fp, tn, fn } }, conclusion: 'Metrics are held-out event results. They do not transfer automatically to unobserved streets.' };
+}
+
 function buildHistoricalReplay({ rainfallRows = [], labelRows = [], district = 'Chennai' }) {
   const rainfall = rainfallRows.filter((row) => String(row.District || row.DISTRICT || row.district || '').toLowerCase() === district.toLowerCase());
   const labels = labelRows.filter((row) => String(row.district || row.DISTRICT || district).toLowerCase() === district.toLowerCase());
@@ -43,12 +56,14 @@ function buildHistoricalReplay({ rainfallRows = [], labelRows = [], district = '
   if (!rainfall.length) missing.push('district rainfall records');
   if (!validLabels.length) missing.push('time-matched flood-depth or inundation labels');
   const dailyOnly = rainfall.some((row) => row['Daily Actual'] != null || row['DAILY ACTUAL'] != null);
+  const hindcast = evaluateHindcasts(labels);
   if (dailyOnly) missing.push('sub-daily storm hyetographs');
   return {
     district, rainfallRecords: rainfall.length, labelCount: validLabels.length, dateRange: dates.length ? { start: dates[0], end: dates.at(-1) } : null,
     rainfallSummary: rainfallValues.length ? { maxDailyMm: Math.max(...rainfallValues), meanDailyMm: rainfallValues.reduce((sum, value) => sum + value, 0) / rainfallValues.length } : null,
-    isCalibrated: validLabels.length >= 20 && !dailyOnly,
-    status: validLabels.length >= 20 && !dailyOnly ? 'ready-for-held-out-calibration' : 'blocked-insufficient-ground-truth',
+    isCalibrated: hindcast.status === 'evaluated-held-out-events' && !dailyOnly,
+    status: hindcast.status === 'evaluated-held-out-events' && !dailyOnly ? 'evaluated-held-out-events' : 'blocked-insufficient-ground-truth',
+    hindcast,
     missing: [...new Set(missing)],
     conclusion: validLabels.length
       ? 'Labels are present, but calibration remains gated until rainfall time resolution matches flood observations.'
@@ -56,4 +71,4 @@ function buildHistoricalReplay({ rainfallRows = [], labelRows = [], district = '
   };
 }
 
-module.exports = { parseCsvRows, loadCalibrationInputs, buildHistoricalReplay };
+module.exports = { parseCsvRows, loadCalibrationInputs, buildHistoricalReplay, evaluateHindcasts };

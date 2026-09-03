@@ -11,11 +11,13 @@ node_modules/
 data/assets/*.tif
 data/assets/*.tiff
 data/assets/*.geojson
+data/assets/*.geojson.state
 data/imerg/*.csv
 data/calibration/sentinel-flood-labels.geojson
 
 # Local-only SWMM toolchain and build caches
 vendor/toolchain/
+vendor/data-tools/
 vendor/swmm524-x64-setup.exe
 vendor/epa-swmm/bin/
 vendor/epa-swmm/zig-cache-local/

@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fsSync = require('fs');
 const fs = require('fs/promises');
-const { fetchGccDrainsForEnvelope, fetchOpenMeteoRainfall, fetchOpenElevation, fetchOpenElevationGrid, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy } = require('./src/data/sources');
+const { fetchGccDrainsForEnvelope, fetchOpenMeteoRainfall, fetchCfmForecastRuns, fetchChennaiMarineBoundary, fetchOpenElevation, fetchOpenElevationGrid, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy } = require('./src/data/sources');
 const { predictDrainageNetwork, isFloodNews } = require('./src/core/hydrograph');
 const { runSwmmPrototype, runSwmmNetwork } = require('./src/core/swmm');
 const { buildDrainGraph } = require('./src/core/drain-graph');
@@ -13,6 +13,7 @@ const { saveScenarioRun, listScenarioRuns } = require('./src/core/run-store');
 const { getDataStackStatus, estimateOvertureImperviousness } = require('./src/data/data-stack');
 const { buildOperationalDecision } = require('./src/core/decision');
 const { evidencePacket, askNarrator } = require('./src/core/narrator');
+const { resolveChennaiContext } = require('./src/core/chennai-context');
 let latestPilotRun = null;
 let calibrationSnapshot = null;
 
@@ -143,23 +144,29 @@ async function buildPilotRun(liveInputs = {}) {
   if (!Number.isFinite(Number(liveInputs.rainfallMmHr))) {
     try { rainfall = await fetchOpenMeteoRainfall({ latitude, longitude }); } catch (error) { rainfall = { source: 'rainfall feed unavailable', mmHr: 0, fresh: false, error: error.message }; }
   }
-  const [elevationResult, newsResult, calibrationResult] = await Promise.allSettled([
+  const [elevationResult, newsResult, calibrationResult, cfmResult, marineResult] = await Promise.allSettled([
     fetchOpenElevation({ latitude, longitude }),
     fetchNewsSignals(`${liveInputs.area?.label || 'Chennai'} flood OR waterlogging`),
     getCalibrationSnapshot(),
+    fetchCfmForecastRuns(),
+    fetchChennaiMarineBoundary(),
   ]);
   const elevation = elevationResult.status === 'fulfilled' ? elevationResult.value : null;
   const newsSignals = newsResult.status === 'fulfilled' ? newsResult.value.map((item) => isFloodNews(item)) : [];
   const calibration = calibrationResult.status === 'fulfilled' ? calibrationResult.value : { status: 'unavailable', labelCount: 0, isCalibrated: false, missing: ['calibration data could not be loaded'] };
+  const cfm = cfmResult.status === 'fulfilled' ? cfmResult.value : null;
+  const marineBoundary = marineResult.status === 'fulfilled' ? marineResult.value : null;
+  const cityContext = resolveChennaiContext({ latitude, longitude, marineBoundary });
   const dataStack = await getDataStackStatus(__dirname);
   const dataSources = [
     { name: 'GCC storm-water drain GIS', state: drainFeed.state, detail: `${features.length} mapped drain features · ${drainFeed.detail}`, fetchedAt: drainFeed.state === 'live' ? new Date().toISOString() : null },
     { name: 'Current rain + 6-hour forecast', state: rainfall.fresh ? 'live' : 'unavailable', detail: rainfall.source, fetchedAt: rainfall.fetchedAt || null },
+    { name: 'Tamil Nadu CFM-DSS forecast run', state: cfm ? 'live' : 'unavailable', detail: cfm ? `${cfm.latestRun.datetime} ${cfm.latestRun.run} · values remain access-controlled by the public portal` : (cfmResult.reason?.message || 'CFM run catalogue unavailable'), fetchedAt: cfm?.fetchedAt || null },
     sourceStatus('Terrain elevation', elevationResult, elevation ? `${elevation.elevationM} m at map focus` : 'Terrain sample unavailable'),
     sourceStatus('Flood and waterlogging news', newsResult, newsSignals.length ? `${newsSignals.length} recent signals; corroboration only` : 'No recent signals'),
     { name: 'Field reports', state: reports.length ? 'live' : 'waiting', detail: reports.length ? `${reports.length} locally recorded report(s)` : 'No verified field report yet' },
-    { name: 'Water-level / velocity sensors', state: 'integration-needed', detail: 'Adapter ready; municipal endpoint required' },
-    { name: 'Tide / outfall state', state: 'integration-needed', detail: 'Adapter ready; harbour/tide endpoint required' },
+    { name: 'Water-level / velocity sensors', state: 'integration-needed', detail: 'CFM public station payload is currently access-controlled; no values inferred' },
+    { name: 'Tide / outfall boundary', state: marineBoundary ? 'modelled' : 'unavailable', detail: marineBoundary ? `${marineBoundary.outfallRestriction} offshore boundary · ${marineBoundary.restriction}` : (marineResult.reason?.message || 'Marine boundary unavailable') },
     { name: 'Historic inundation labels', state: 'integration-needed', detail: 'Import NRSC/municipal historical flood layer to calibrate' },
     { name: 'Historical calibration gate', state: calibration.isCalibrated ? 'validated' : 'blocked', detail: calibration.conclusion || 'Calibration evidence unavailable' },
     ...dataStack.sources.map((source) => ({ name: source.name, state: source.state, detail: `${source.resolution} · ${source.access}` })),
@@ -187,7 +194,7 @@ async function buildPilotRun(liveInputs = {}) {
   dataSources.push({ name: 'Hydraulic solver', state: swmm.solved ? 'modelled' : 'blocked', detail: swmm.solved ? `${swmm.engine}: observed GIS geometry + inverts + rain; ${swmm.audit.assumptions.length} assumptions exposed` : `EPA SWMM blocked: ${swmm.error || 'unknown error'}`, fetchedAt: new Date().toISOString() });
   if (swmm.solved) for (const prediction of predictions) prediction.swmm = { engine: swmm.engine, mode: swmm.mode, maxFloodVolumeM3: swmm.maxFloodVolumeM3 };
   const decision = buildOperationalDecision({ rainfall, reports, predictions });
-  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, dataStack, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'GCC drain geometry feed', !rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
+  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, dataStack, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, cfm, marineBoundary, cityContext, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'GCC drain geometry feed', !rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
 }
 
 function createWindow() {
@@ -231,7 +238,8 @@ app.whenReady().then(() => {
       elevationGrid = await fetchOpenElevationGrid({ latitude, longitude });
     } catch { /* surface output is withheld below when local terrain is unavailable */ }
     const terrainContext = deriveTerrainContext(elevationGrid?.samples, latitude, longitude);
-    const drainContext = selectedSegment ? { observed: Boolean(selectedSegment.widthObserved && selectedSegment.depthObserved && Number.isFinite(selectedSegment.invertStartM) && Number.isFinite(selectedSegment.invertEndM)), distanceM: run.snappedDrain?.snappedDistanceM, capacityIndex: selectedSegment.widthM * selectedSegment.depthM * Math.sqrt(Math.max(.00001, selectedSegment.slope || 0)) } : {};
+    const boundaryMultiplier = run.marineBoundary?.capacityMultiplier || 1;
+    const drainContext = selectedSegment ? { observed: Boolean(selectedSegment.widthObserved && selectedSegment.depthObserved && Number.isFinite(selectedSegment.invertStartM) && Number.isFinite(selectedSegment.invertEndM)), distanceM: run.snappedDrain?.snappedDistanceM, capacityIndex: selectedSegment.widthM * selectedSegment.depthM * Math.sqrt(Math.max(.00001, selectedSegment.slope || 0)) * boundaryMultiplier, boundaryMultiplier } : {};
     const surface = simulateSurfaceSpill({ rainfallMmHr, imperviousPct: runoff.imperviousPct, catchmentAreaHa: .45, elevationM: terrainContext?.elevationM || run.elevation?.elevationM, drainageRisk: risk, swmm: networkSwmm.solved ? networkSwmm : run.swmm, topologyConfidence: selectedSegment?.topology?.confidence || 0, calibration: run.calibration, terrain: terrainContext || {}, drain: drainContext });
     let raster = null;
     if (surface.available && elevationGrid) {
@@ -240,7 +248,7 @@ app.whenReady().then(() => {
     } else raster = { status: 'withheld-missing-location-inputs', error: surface.missing?.join(', ') || 'Elevation grid unavailable' };
     let streetPhoto = { available: false, source: 'KartaView public street imagery' };
     try { streetPhoto = await fetchKartaViewStreetPhoto({ latitude, longitude }); } catch { /* projection remains available without imagery */ }
-    const scenario = { rainfallMmHr, surface, raster, networkSwmm, modelScope: 'Chennai citywide on-demand micro-twin', basis: 'Tier 1: local multi-drain SWMM experiment. Tier 2: deterministic surface-spill raster using sparse public elevation samples.', selectedDrain: run.snappedDrain, localNetwork, runoff, streetPhoto, disclaimer: surface.disclaimer };
+    const scenario = { rainfallMmHr, surface, raster, networkSwmm, modelScope: 'Chennai citywide on-demand micro-twin', basis: 'Tier 1: local multi-drain SWMM experiment. Tier 2: deterministic surface-spill raster using sparse public elevation samples.', selectedDrain: run.snappedDrain, localNetwork, runoff, streetPhoto, cityContext: run.cityContext, marineBoundary: run.marineBoundary, disclaimer: `${surface.disclaimer} ${run.cityContext?.connection || ''}`.trim() };
     const saved = await saveScenarioRun(path.join(app.getPath('userData'), 'scenario-runs'), { location: area, scenario: { rainfallMmHr, surface, raster: { status: raster.status, stats: raster.stats, elevationSource: raster.elevationSource }, networkSwmm: { solved: networkSwmm.solved, mode: networkSwmm.mode, linksModelled: networkSwmm.linksModelled, maxFloodVolumeM3: networkSwmm.maxFloodVolumeM3 } }, calibration: run.calibration });
     return { ...run, scenario: { ...scenario, runId: saved.id } };
   });
