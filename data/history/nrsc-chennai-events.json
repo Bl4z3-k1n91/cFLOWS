@@ -1,0 +1,8 @@
+{
+  "source": "NRSC/ISRO Bhuvan public disaster archive",
+  "events": [
+    { "id": "nrsc-chennai-2015-risat-cumulative", "dateRange": "2015-12-03 to 2015-12-06", "layerId": "ch_exp_0306dec15", "use": "official satellite inundation evidence; vector extraction required before calibration" },
+    { "id": "nrsc-chennai-2015-cartosat-post-event", "dateRange": "2015-12-04", "layerId": "ch_c2_sat", "use": "post-event reference imagery, not a label" },
+    { "id": "nrsc-chennai-2021-inundation-map", "dateRange": "2021-11-13", "eventId": "15-FL-2021-TN", "use": "official PDF map; georeference and review before calibration" }
+  ]
+}

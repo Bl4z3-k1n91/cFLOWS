@@ -4,6 +4,7 @@ const { buildDrainGraph } = require('../src/core/drain-graph');
 const { simulateSurfaceSpill } = require('../src/core/surface-spill');
 const { buildHistoricalReplay, evaluateHindcasts } = require('../src/core/calibration');
 const { resolveChennaiContext } = require('../src/core/chennai-context');
+const { getHistoricalEvidenceRegistry } = require('../src/data/historical-evidence');
 const { makeRaster, runRasterSpill, inspectRasterPoint } = require('../src/core/raster-spill');
 const { buildNetworkInp } = require('../src/core/swmm');
 const { getDataStackStatus } = require('../src/data/data-stack');
@@ -59,6 +60,13 @@ test('regional Chennai context exposes an outfall hypothesis without claiming pi
   assert.match(result.catchment, /Pallikaranai/);
   assert.match(result.connection, /does not prove/i);
   assert.equal(result.marineBoundary.observed, false);
+});
+
+test('official NRSC history is evidence until a georeferenced label is reviewed', () => {
+  const archive = getHistoricalEvidenceRegistry();
+  assert.equal(archive.usableLabelCount, 0);
+  assert.ok(archive.events.some((event) => event.layerId === 'ch_exp_0306dec15'));
+  assert.match(archive.conclusion, /not used to calibrate/i);
 });
 
 test('deterministic sparse-terrain raster conserves rainfall within numerical tolerance', () => {

@@ -14,6 +14,7 @@ const { getDataStackStatus, estimateOvertureImperviousness } = require('./src/da
 const { buildOperationalDecision } = require('./src/core/decision');
 const { evidencePacket, askNarrator } = require('./src/core/narrator');
 const { resolveChennaiContext } = require('./src/core/chennai-context');
+const { getHistoricalEvidenceRegistry } = require('./src/data/historical-evidence');
 let latestPilotRun = null;
 let calibrationSnapshot = null;
 
@@ -154,6 +155,7 @@ async function buildPilotRun(liveInputs = {}) {
   const elevation = elevationResult.status === 'fulfilled' ? elevationResult.value : null;
   const newsSignals = newsResult.status === 'fulfilled' ? newsResult.value.map((item) => isFloodNews(item)) : [];
   const calibration = calibrationResult.status === 'fulfilled' ? calibrationResult.value : { status: 'unavailable', labelCount: 0, isCalibrated: false, missing: ['calibration data could not be loaded'] };
+  const historicalEvidence = getHistoricalEvidenceRegistry();
   const cfm = cfmResult.status === 'fulfilled' ? cfmResult.value : null;
   const marineBoundary = marineResult.status === 'fulfilled' ? marineResult.value : null;
   const cityContext = resolveChennaiContext({ latitude, longitude, marineBoundary });
@@ -168,6 +170,7 @@ async function buildPilotRun(liveInputs = {}) {
     { name: 'Water-level / velocity sensors', state: 'integration-needed', detail: 'CFM public station payload is currently access-controlled; no values inferred' },
     { name: 'Tide / outfall boundary', state: marineBoundary ? 'modelled' : 'unavailable', detail: marineBoundary ? `${marineBoundary.outfallRestriction} offshore boundary · ${marineBoundary.restriction}` : (marineResult.reason?.message || 'Marine boundary unavailable') },
     { name: 'Historic inundation labels', state: 'integration-needed', detail: 'Import NRSC/municipal historical flood layer to calibrate' },
+    { name: 'NRSC/ISRO Chennai flood archive', state: 'evidence-ready', detail: `${historicalEvidence.events.length} official event/prior layers registered; ${historicalEvidence.usableLabelCount} georeferenced calibration labels`, fetchedAt: null },
     { name: 'Historical calibration gate', state: calibration.isCalibrated ? 'validated' : 'blocked', detail: calibration.conclusion || 'Calibration evidence unavailable' },
     ...dataStack.sources.map((source) => ({ name: source.name, state: source.state, detail: `${source.resolution} · ${source.access}` })),
   ];
@@ -194,7 +197,7 @@ async function buildPilotRun(liveInputs = {}) {
   dataSources.push({ name: 'Hydraulic solver', state: swmm.solved ? 'modelled' : 'blocked', detail: swmm.solved ? `${swmm.engine}: observed GIS geometry + inverts + rain; ${swmm.audit.assumptions.length} assumptions exposed` : `EPA SWMM blocked: ${swmm.error || 'unknown error'}`, fetchedAt: new Date().toISOString() });
   if (swmm.solved) for (const prediction of predictions) prediction.swmm = { engine: swmm.engine, mode: swmm.mode, maxFloodVolumeM3: swmm.maxFloodVolumeM3 };
   const decision = buildOperationalDecision({ rainfall, reports, predictions });
-  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, dataStack, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, cfm, marineBoundary, cityContext, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'GCC drain geometry feed', !rainfall.fresh && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
+  return { source: 'Greater Chennai Corporation Storm Water Drain GIS', fetchedAt: new Date().toISOString(), drainFeed, dataStack, drainCount: features.length, geojson: { type: 'FeatureCollection', features }, segments, graph, calibration, historicalEvidence, cfm, marineBoundary, cityContext, predictions, reports, rainfall, elevation, newsSignals, dataSources, decision, swmm, snappedDrain: swmm.representativeDrain, focus: { latitude, longitude, label: liveInputs.area?.label || 'Velachery / Pallikaranai' }, readiness: rainfall.fresh && drainFeed.state !== 'unavailable' ? 'rain-feed-ready' : 'insufficient-live-inputs', missing: [drainFeed.state === 'unavailable' && 'fresh rainfall forcing', !reports.length && 'a verified field report or water-level sensor'].filter(Boolean) };
 }
 
 function createWindow() {
