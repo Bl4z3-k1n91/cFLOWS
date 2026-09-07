@@ -1,0 +1,228 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-09-07T14:54:06Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 2086712180,
+  "lat": 12.9559858,
+  "lon": 80.1853072,
+  "tags": {
+    "amenity": "police",
+    "name": "Madipakkam Police Station",
+    "opening_hours": "24/7"
+  }
+},
+{
+  "type": "node",
+  "id": 2086712181,
+  "lat": 12.9560250,
+  "lon": 80.1850444,
+  "tags": {
+    "amenity": "school",
+    "name": "Goverment school"
+  }
+},
+{
+  "type": "node",
+  "id": 2086712439,
+  "lat": 12.9559409,
+  "lon": 80.1855637,
+  "tags": {
+    "amenity": "hospital",
+    "healthcare": "hospital"
+  }
+},
+{
+  "type": "node",
+  "id": 6916036803,
+  "lat": 12.9644392,
+  "lon": 80.1876010,
+  "tags": {
+    "addr:district": "Kanchipuram",
+    "addr:full": "No. 20, Medavakkam Main Road, Madipakkam",
+    "addr:postcode": "600091",
+    "addr:state": "Tamil Nadu",
+    "addr:street": "Mount - Medavakkam Road",
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Divya Hospital",
+    "source": "OpenGovernmentData",
+    "website": "http://chennaipregnancycare.blogspot.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 6926437476,
+  "lat": 12.9569773,
+  "lon": 80.1867561,
+  "tags": {
+    "addr:district": "Kanchipuram",
+    "addr:full": "No.56 Medavaakkam Main Raod Keelkattalai",
+    "addr:postcode": "600045",
+    "addr:state": "Tamil Nadu",
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Grace Multipeciality Hospital",
+    "source": "OpenGovernmentData"
+  }
+},
+{
+  "type": "node",
+  "id": 6932966227,
+  "lat": 12.9574752,
+  "lon": 80.1859635,
+  "tags": {
+    "addr:district": "Kanchipuram",
+    "addr:full": "G-1,Thiruvalluvar Narar Main Road, Keelkattalai",
+    "addr:postcode": "600117",
+    "addr:state": "Tamil Nadu",
+    "amenity": "clinic",
+    "healthcare": "clinic",
+    "name": "Lakshmi Clinic",
+    "source": "OpenGovernmentData"
+  }
+},
+{
+  "type": "node",
+  "id": 6934270989,
+  "lat": 12.9637407,
+  "lon": 80.1880047,
+  "tags": {
+    "addr:city": "Chennai",
+    "addr:district": "Kanchipuram",
+    "addr:full": "#23, Medavakkam Main Road ,Near K.K.Mahal ,Madipakkam",
+    "addr:housenumber": "23",
+    "addr:postcode": "600091",
+    "addr:state": "Tamil Nadu",
+    "addr:street": "Mount - Medavakkam Road",
+    "amenity": "hospital",
+    "email": "anjakha@yahoo.co.in",
+    "healthcare": "hospital",
+    "healthcare:speciality": "multi_speciality",
+    "name": "Anjakha Hospital",
+    "name:ta": "அஞ்சகா மருத்துவமனை",
+    "phone": "+91 44 2247 0405;+91 44 2247 0406",
+    "source": "OpenGovernmentData",
+    "website": "https://anjakhahospitals.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 6936134766,
+  "lat": 12.9498348,
+  "lon": 80.1690781,
+  "tags": {
+    "addr:full": "No: 2, Iii Main Road, New Colony, Chrompet,Chennai",
+    "amenity": "hospital",
+    "healthcare": "hospital"
+  }
+},
+{
+  "type": "node",
+  "id": 7257421582,
+  "lat": 12.9586600,
+  "lon": 80.1871980,
+  "tags": {
+    "addr:block": "Tambaram Mpty",
+    "addr:district": "Kanchipuram",
+    "addr:full": "No. 70, Medavakkam Main Road, Next To Subiksha Super Market, Keelkattalai, Chennai",
+    "addr:postcode": "600117",
+    "addr:state": "Tamil Nadu",
+    "addr:subdistrict": "Tambaram",
+    "amenity": "hospital",
+    "healthcare": "hospital",
+    "name": "Vijayam Hospital & Fertility Centre",
+    "source": "OpenGovernmentData"
+  }
+},
+{
+  "type": "node",
+  "id": 8594028687,
+  "lat": 12.9528734,
+  "lon": 80.1862504,
+  "tags": {
+    "addr:city": "Chennai",
+    "addr:housenumber": "46",
+    "addr:street": "Medavakkam Main Road",
+    "amenity": "clinic",
+    "healthcare": "clinic",
+    "healthcare:speciality": "fertility",
+    "name": "Selva Maternity Clinic"
+  }
+},
+{
+  "type": "node",
+  "id": 8597641343,
+  "lat": 12.9586006,
+  "lon": 80.1868115,
+  "tags": {
+    "amenity": "clinic",
+    "healthcare": "clinic",
+    "level": "1",
+    "name": "Progress Clinic",
+    "opening_hours": "Mo-Su 08:00-21:00"
+  }
+},
+{
+  "type": "node",
+  "id": 8628194990,
+  "lat": 12.9602888,
+  "lon": 80.1865100,
+  "tags": {
+    "addr:city": "Chennai",
+    "addr:housenumber": "62",
+    "addr:postcode": "600117",
+    "addr:street": "Medavakkam Main Road",
+    "amenity": "school",
+    "email": "hf_con@yahoo.co.in",
+    "grades": "1-12",
+    "name": "Holy Family Convent Matric. Hr. Sec. School",
+    "opening_hours": "Mo-Fr 09:00-16:00",
+    "phone": "+91 44 2247 3008",
+    "website": "https://www.holyfamilyconvent.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 8669165867,
+  "lat": 12.9688048,
+  "lon": 80.1844534,
+  "tags": {
+    "amenity": "school",
+    "name": "Government Primary School",
+    "operator": "Government of Tamil Nadu",
+    "operator:type": "government"
+  }
+},
+{
+  "type": "way",
+  "id": 943797892,
+  "center": {
+    "lat": 12.9651560,
+    "lon": 80.1692906
+  },
+  "tags": {
+    "amenity": "school"
+  }
+},
+{
+  "type": "way",
+  "id": 1546615782,
+  "center": {
+    "lat": 12.9539369,
+    "lon": 80.1658025
+  },
+  "tags": {
+    "amenity": "school",
+    "education": "school"
+  }
+}
+
+  ]
+}

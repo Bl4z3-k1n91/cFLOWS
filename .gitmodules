@@ -1,3 +1,4 @@
 [submodule "epa-swmm"]
 	path = vendor/epa-swmm
 	url = https://github.com/USEPA/Stormwater-Management-Model.git
+	ignore = untracked

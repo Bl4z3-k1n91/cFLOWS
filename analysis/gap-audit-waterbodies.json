@@ -1,0 +1,1209 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-09-07T14:52:04Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 23648229,
+  "center": {
+    "lat": 12.9337340,
+    "lon": 80.1361542
+  },
+  "tags": {
+    "name": "Chitlapakkam Lake",
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 25504265,
+  "center": {
+    "lat": 12.9882439,
+    "lon": 80.2115030
+  },
+  "tags": {
+    "name": "Velachery Lake",
+    "name:ta": "வேளச்சேரி ஏரி",
+    "natural": "water",
+    "tidal": "no",
+    "water": "lake",
+    "wikidata": "Q7352533",
+    "wikipedia": "en:Velachery Lake"
+  }
+},
+{
+  "type": "way",
+  "id": 25724261,
+  "center": {
+    "lat": 12.9862922,
+    "lon": 80.1966839
+  },
+  "tags": {
+    "name": "Adambakkam Lake",
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 25724278,
+  "center": {
+    "lat": 12.9844606,
+    "lon": 80.1878689
+  },
+  "tags": {
+    "alt_name": "Nanganallur Temple Tank",
+    "name": "Pannachiamman Koil Tank",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 25725027,
+  "center": {
+    "lat": 12.9613673,
+    "lon": 80.1909225
+  },
+  "tags": {
+    "alt_name": "Karthikeyapuram Lake",
+    "name": "Madipakkam Lake",
+    "name:ta": "மடிப்பாக்கம் ஏரி",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 25726316,
+  "center": {
+    "lat": 12.9685658,
+    "lon": 80.2021207
+  },
+  "tags": {
+    "name": "Puzhuthivakkam Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 26433707,
+  "center": {
+    "lat": 12.9336624,
+    "lon": 80.1534105
+  },
+  "tags": {
+    "name": "Sembakkam lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 28260258,
+  "center": {
+    "lat": 12.9304605,
+    "lon": 80.1856076
+  },
+  "tags": {
+    "name": "Vadakkapattu Lake",
+    "name:ta": "மேடவாக்கம் ஏரி",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 28260431,
+  "center": {
+    "lat": 12.9393675,
+    "lon": 80.1670185
+  },
+  "tags": {
+    "name": "Nanmangalam Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 28309481,
+  "center": {
+    "lat": 12.9692931,
+    "lon": 80.1718276
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 28309498,
+  "center": {
+    "lat": 12.9695943,
+    "lon": 80.1685403
+  },
+  "tags": {
+    "created_by": "Potlatch 0.10f",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 28309593,
+  "center": {
+    "lat": 12.9681347,
+    "lon": 80.1678879
+  },
+  "tags": {
+    "created_by": "Potlatch 0.10f",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 28309687,
+  "center": {
+    "lat": 12.9735338,
+    "lon": 80.1687634
+  },
+  "tags": {
+    "created_by": "Potlatch 0.10f",
+    "name": "Tirisulam Lake",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 28310149,
+  "center": {
+    "lat": 12.9785688,
+    "lon": 80.1722953
+  },
+  "tags": {
+    "created_by": "Potlatch 0.10f",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 28310161,
+  "center": {
+    "lat": 12.9802165,
+    "lon": 80.1725528
+  },
+  "tags": {
+    "created_by": "Potlatch 0.10f",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 30118530,
+  "center": {
+    "lat": 12.9497354,
+    "lon": 80.1313528
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 30746879,
+  "center": {
+    "lat": 12.9458111,
+    "lon": 80.1547352
+  },
+  "tags": {
+    "created_by": "Potlatch 0.10f",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 47572261,
+  "center": {
+    "lat": 12.9188621,
+    "lon": 80.1508020
+  },
+  "tags": {
+    "name": "Rajakilpakkam Lake",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 82883558,
+  "center": {
+    "lat": 12.9178028,
+    "lon": 80.1837776
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 84099124,
+  "center": {
+    "lat": 12.9637856,
+    "lon": 80.1974717
+  },
+  "tags": {
+    "name": "Madippakkam Village Pond",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 86251016,
+  "center": {
+    "lat": 12.9726283,
+    "lon": 80.1327660
+  },
+  "tags": {
+    "name": "Sooriamman Koil pond",
+    "natural": "water",
+    "tourism": "attraction",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 96944715,
+  "center": {
+    "lat": 12.9823324,
+    "lon": 80.1347134
+  },
+  "tags": {
+    "natural": "water",
+    "water": "river"
+  }
+},
+{
+  "type": "way",
+  "id": 131425313,
+  "center": {
+    "lat": 12.9548556,
+    "lon": 80.2184361
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 131425321,
+  "center": {
+    "lat": 12.9635571,
+    "lon": 80.2266112
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 154089347,
+  "center": {
+    "lat": 12.9347305,
+    "lon": 80.2045746
+  },
+  "tags": {
+    "alt_name": "Pallikaranai Lotus Pond",
+    "name": "Pallikaranai Thamarai Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 159017372,
+  "center": {
+    "lat": 12.9392728,
+    "lon": 80.1781880
+  },
+  "tags": {
+    "boat": "no",
+    "name": "Ponniamman Temple Pond",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 177370838,
+  "center": {
+    "lat": 12.9257363,
+    "lon": 80.1578824
+  },
+  "tags": {
+    "name": "Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 197488611,
+  "center": {
+    "lat": 12.9250359,
+    "lon": 80.2069302
+  },
+  "tags": {
+    "name": "Thandukarai Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 198549437,
+  "center": {
+    "lat": 12.9592396,
+    "lon": 80.1825776
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 203215028,
+  "center": {
+    "lat": 12.9337095,
+    "lon": 80.1969573
+  },
+  "tags": {
+    "name": "Pallikkaranai Anai Tank",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 203215030,
+  "center": {
+    "lat": 12.9286829,
+    "lon": 80.1981877
+  },
+  "tags": {
+    "name": "Pallikkaranai Eri",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 203215355,
+  "center": {
+    "lat": 12.9388454,
+    "lon": 80.1925966
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 203215356,
+  "center": {
+    "lat": 12.9241756,
+    "lon": 80.1945657
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 203215357,
+  "center": {
+    "lat": 12.9362940,
+    "lon": 80.1909605
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 369099870,
+  "center": {
+    "lat": 12.9641209,
+    "lon": 80.1658054
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 369099873,
+  "center": {
+    "lat": 12.9612866,
+    "lon": 80.1667013
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 369100833,
+  "center": {
+    "lat": 12.9618388,
+    "lon": 80.1341656
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 369625991,
+  "center": {
+    "lat": 12.9323396,
+    "lon": 80.2050163
+  },
+  "tags": {
+    "name": "New Colony Pond",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 369625993,
+  "center": {
+    "lat": 12.9302632,
+    "lon": 80.2096720
+  },
+  "tags": {
+    "name": "Naasan Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 369625994,
+  "center": {
+    "lat": 12.9322339,
+    "lon": 80.2061564
+  },
+  "tags": {
+    "name": "Kovalan Nagar Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 369648524,
+  "center": {
+    "lat": 12.9531349,
+    "lon": 80.1582388
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 369650944,
+  "center": {
+    "lat": 12.9484223,
+    "lon": 80.1619900
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 384312064,
+  "center": {
+    "lat": 12.9414832,
+    "lon": 80.2049564
+  },
+  "tags": {
+    "name": "Ayyan Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 384312610,
+  "center": {
+    "lat": 12.9447896,
+    "lon": 80.2066313
+  },
+  "tags": {
+    "natural": "wetland",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 384476259,
+  "center": {
+    "lat": 12.9715560,
+    "lon": 80.1358572
+  },
+  "tags": {
+    "name": "Thirupunanthal Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 385030602,
+  "center": {
+    "lat": 12.9722470,
+    "lon": 80.1668819
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 385032247,
+  "center": {
+    "lat": 12.9644893,
+    "lon": 80.1709442
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 385625356,
+  "center": {
+    "lat": 12.9209260,
+    "lon": 80.1566787
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 385625844,
+  "center": {
+    "lat": 12.9367476,
+    "lon": 80.1434579
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 385786366,
+  "center": {
+    "lat": 12.9177656,
+    "lon": 80.1636984
+  },
+  "tags": {
+    "name": "Vengaivasal Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 479690974,
+  "center": {
+    "lat": 12.9406873,
+    "lon": 80.2160049
+  },
+  "tags": {
+    "name": "MF sanskriti",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 479690978,
+  "center": {
+    "lat": 12.9469233,
+    "lon": 80.2112207
+  },
+  "tags": {
+    "name": "Niot",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 540171888,
+  "center": {
+    "lat": 12.9360242,
+    "lon": 80.1588626
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 595625973,
+  "center": {
+    "lat": 12.9571750,
+    "lon": 80.2148170
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 595625974,
+  "center": {
+    "lat": 12.9688687,
+    "lon": 80.2171615
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 595626698,
+  "center": {
+    "lat": 12.9676602,
+    "lon": 80.2172316
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 595626700,
+  "center": {
+    "lat": 12.9659539,
+    "lon": 80.2165567
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 620724466,
+  "center": {
+    "lat": 12.9718800,
+    "lon": 80.1741296
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 620725768,
+  "center": {
+    "lat": 12.9431685,
+    "lon": 80.1834765
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 620725775,
+  "center": {
+    "lat": 12.9411590,
+    "lon": 80.1960964
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661100682,
+  "center": {
+    "lat": 12.9734803,
+    "lon": 80.2083204
+  },
+  "tags": {
+    "name": "Mandapam Kuttai",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661100683,
+  "center": {
+    "lat": 12.9731804,
+    "lon": 80.2041522
+  },
+  "tags": {
+    "name": "Sada Kuttai",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661100684,
+  "center": {
+    "lat": 12.9718062,
+    "lon": 80.2030002
+  },
+  "tags": {
+    "name": "Gangai Amman Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661100685,
+  "center": {
+    "lat": 12.9725080,
+    "lon": 80.2043601
+  },
+  "tags": {
+    "name": "Rettai Kuttai",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661100697,
+  "center": {
+    "lat": 12.9276405,
+    "lon": 80.2057482
+  },
+  "tags": {
+    "name": "Varadharajapuram Pond",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661100698,
+  "center": {
+    "lat": 12.9362127,
+    "lon": 80.2015928
+  },
+  "tags": {
+    "name": "Ambal Nagar Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 661100699,
+  "center": {
+    "lat": 12.9364719,
+    "lon": 80.2040751
+  },
+  "tags": {
+    "name": "Pillaiyar Koil Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661117609,
+  "center": {
+    "lat": 12.9938437,
+    "lon": 80.2006759
+  },
+  "tags": {
+    "name": "Nandeeshwaran Koil Kulam",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 661117610,
+  "center": {
+    "lat": 12.9699681,
+    "lon": 80.1799171
+  },
+  "tags": {
+    "name": "NGGO Colony Lake",
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 666765037,
+  "center": {
+    "lat": 12.9452065,
+    "lon": 80.2149659
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 666765038,
+  "center": {
+    "lat": 12.9468805,
+    "lon": 80.2140121
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 666765040,
+  "center": {
+    "lat": 12.9450261,
+    "lon": 80.2134377
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 666765730,
+  "center": {
+    "lat": 12.9459928,
+    "lon": 80.2140335
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 754069136,
+  "center": {
+    "lat": 12.9190430,
+    "lon": 80.1834219
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 847263340,
+  "center": {
+    "lat": 12.9609775,
+    "lon": 80.2134408
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 864059072,
+  "center": {
+    "lat": 12.9556174,
+    "lon": 80.1779449
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 864059073,
+  "center": {
+    "lat": 12.9640622,
+    "lon": 80.1809784
+  },
+  "tags": {
+    "name": "Moovarasampettai Lake",
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 864059074,
+  "center": {
+    "lat": 12.9603990,
+    "lon": 80.1791945
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 864059075,
+  "center": {
+    "lat": 12.9597675,
+    "lon": 80.1789965
+  },
+  "tags": {
+    "natural": "water"
+  }
+},
+{
+  "type": "way",
+  "id": 932267465,
+  "center": {
+    "lat": 12.9694554,
+    "lon": 80.1857224
+  },
+  "tags": {
+    "name": "Gangaiamman Temple Pond",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 964595234,
+  "center": {
+    "lat": 12.9929461,
+    "lon": 80.1502800
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 964595243,
+  "center": {
+    "lat": 12.9926620,
+    "lon": 80.1482806
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 964595265,
+  "center": {
+    "lat": 12.9906487,
+    "lon": 80.1486293
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 964595279,
+  "center": {
+    "lat": 12.9897538,
+    "lon": 80.1470183
+  },
+  "tags": {
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "way",
+  "id": 1124798108,
+  "center": {
+    "lat": 12.9618888,
+    "lon": 80.2180522
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 1124798109,
+  "center": {
+    "lat": 12.9514086,
+    "lon": 80.2168429
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 1124798110,
+  "center": {
+    "lat": 12.9493645,
+    "lon": 80.2120847
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 1124798111,
+  "center": {
+    "lat": 12.9605533,
+    "lon": 80.2160148
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 1124798112,
+  "center": {
+    "lat": 12.9596022,
+    "lon": 80.2212786
+  },
+  "tags": {
+    "natural": "water",
+    "water": "lake"
+  }
+},
+{
+  "type": "way",
+  "id": 1237405956,
+  "center": {
+    "lat": 12.9872865,
+    "lon": 80.1414212
+  },
+  "tags": {
+    "natural": "water",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "way",
+  "id": 1270849333,
+  "center": {
+    "lat": 12.9575717,
+    "lon": 80.1987616
+  },
+  "tags": {
+    "name": "Nayakkar Kuttai",
+    "natural": "water",
+    "water": "pond"
+  }
+},
+{
+  "type": "relation",
+  "id": 27943,
+  "center": {
+    "lat": 13.0151378,
+    "lon": 80.2204631
+  },
+  "tags": {
+    "natural": "water",
+    "type": "multipolygon",
+    "water": "river"
+  }
+},
+{
+  "type": "relation",
+  "id": 6201190,
+  "center": {
+    "lat": 12.9443549,
+    "lon": 80.1892881
+  },
+  "tags": {
+    "name": "Kovilambakkam Lake",
+    "name:ta": "கோவிலம்பாக்கம் ஏரி",
+    "natural": "water",
+    "type": "multipolygon",
+    "water": "lake"
+  }
+},
+{
+  "type": "relation",
+  "id": 11915438,
+  "center": {
+    "lat": 12.9460910,
+    "lon": 80.2021922
+  },
+  "tags": {
+    "name": "Narayanapuram Lake",
+    "natural": "water",
+    "type": "multipolygon",
+    "water": "reservoir"
+  }
+},
+{
+  "type": "relation",
+  "id": 13671410,
+  "center": {
+    "lat": 12.9502418,
+    "lon": 80.1781994
+  },
+  "tags": {
+    "name": "Keelkatalai Lake",
+    "natural": "water",
+    "type": "multipolygon",
+    "water": "lake"
+  }
+},
+{
+  "type": "relation",
+  "id": 16916505,
+  "center": {
+    "lat": 12.9590443,
+    "lon": 80.1515170
+  },
+  "tags": {
+    "alt_name": "Periya Aeri",
+    "name": "Pallavaram Lake",
+    "natural": "water",
+    "type": "multipolygon",
+    "water": "lake"
+  }
+}
+
+  ]
+}

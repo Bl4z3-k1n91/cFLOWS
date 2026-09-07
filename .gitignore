@@ -6,6 +6,8 @@ node_modules/
 
 # Electron runtime data and generated model runs
 .electron-data/
+.sync-data/
+tmp/
 *.rpt
 *.out
 data/assets/*.tif
@@ -14,6 +16,9 @@ data/assets/*.geojson
 data/assets/*.geojson.state
 data/imerg/*.csv
 data/calibration/sentinel-flood-labels.geojson
+data/sensors/live.json
+data/terrain/local-elevation-samples.json
+data/boundary/*.json
 
 # Local-only SWMM toolchain and build caches
 vendor/toolchain/

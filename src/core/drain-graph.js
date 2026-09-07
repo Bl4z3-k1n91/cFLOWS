@@ -66,14 +66,19 @@ function buildDrainGraph(segments, { junctionToleranceM = 4, candidateToleranceM
   const byId = new Map(segments.map((segment) => [segment.id, segment]));
   for (const segment of segments) {
     const outgoing = bestCandidates.filter((candidate) => candidate.fromId === segment.id);
+    const geometryLinks = outgoing.filter((candidate) => candidate.kind === 'coincident-endpoints' && candidate.confidence >= .7);
     segment.topology = {
       status: outgoing.length ? 'inferred-candidates' : 'isolated-in-public-geometry',
       confidence: outgoing.length ? Math.max(...outgoing.map((candidate) => candidate.confidence)) : 0,
       inferredDownstreamIds: outgoing.filter((candidate) => candidate.confidence >= .7).map((candidate) => candidate.toId),
+      geometryDownstreamIds: geometryLinks.map((candidate) => candidate.toId),
       confirmedDownstreamIds: [],
+      propagationBasis: geometryLinks.length ? 'coincident-public-endpoints' : 'none',
     };
-    // Only surveyed/confirmed connectivity may influence hydraulic propagation.
-    segment.downstreamIds = segment.topology.confirmedDownstreamIds;
+    // Coincident endpoints are observed in the public geometry and may be used
+    // for exploratory propagation. Proximity-only candidates never influence
+    // hydraulics automatically, and surveyed connectivity remains a separate field.
+    segment.downstreamIds = segment.topology.geometryDownstreamIds;
   }
   for (const link of links) { const segment = byId.get(link.id); nodes.find((node) => node.id === link.inletNodeId).degree += 1; nodes.find((node) => node.id === link.outletNodeId).degree += 1; if (segment) link.topologyConfidence = segment.topology.confidence; }
   return {
@@ -81,8 +86,9 @@ function buildDrainGraph(segments, { junctionToleranceM = 4, candidateToleranceM
     summary: {
       segments: usable.length, nodes: nodes.length, inferredLinks: bestCandidates.length,
       highConfidenceCandidates: bestCandidates.filter((candidate) => candidate.confidence >= .7).length,
+      geometryLinks: bestCandidates.filter((candidate) => candidate.kind === 'coincident-endpoints' && candidate.confidence >= .7).length,
       confirmedLinks: 0,
-      status: 'public-geometry-inference-only',
+      status: 'public-geometry-with-coincident-endpoint-topology',
     },
   };
 }

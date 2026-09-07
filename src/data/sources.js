@@ -1,5 +1,7 @@
 'use strict';
 
+const { PNG } = require('pngjs');
+
 const GCC_DRAIN_QUERY = 'https://gisgcc.chennaicorporation.gov.in/server/rest/services/GCCDepts/GCC_COLLABORATION_LAYER/MapServer/8/query';
 const CFM_BASE_URL = 'https://chennaifloodmonitor.tn.gov.in';
 
@@ -7,7 +9,7 @@ const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mill
 
 async function fetchGccDrainsForEnvelope({ west, south, east, north }) {
   const query = new URLSearchParams({
-    where: '1=1', outFields: 'objectid,location,drain_wid,drain_dep,drain_type,status,invert_sp,invert_ep,water_flow',
+    where: '1=1', outFields: 'objectid,location,drain_wid,drain_dep,drain_size,drain_detl,drain_type,status,invert_sp,invert_ep,water_flow',
     geometry: `${west},${south},${east},${north}`, geometryType: 'esriGeometryEnvelope', inSR: '4326', spatialRel: 'esriSpatialRelIntersects', outSR: '4326', f: 'geojson', returnGeometry: 'true',
   });
   let lastError;
@@ -103,6 +105,68 @@ async function fetchOpenElevationGrid({ latitude, longitude, radiusM = 480, coun
   return { source: 'Open-Elevation sparse 5×5 terrain samples', samples, radiusM, fresh: true, fetchedAt: new Date().toISOString() };
 }
 
+function terrariumElevationFromRgb(red, green, blue) {
+  return red * 256 + green + blue / 256 - 32768;
+}
+
+function mercatorGlobalPixel(latitude, longitude, zoom = 14) {
+  const size = 256 * 2 ** zoom;
+  const lat = Math.max(-85.05112878, Math.min(85.05112878, Number(latitude))) * Math.PI / 180;
+  const x = (Number(longitude) + 180) / 360 * size;
+  const y = (1 - Math.log(Math.tan(lat) + 1 / Math.cos(lat)) / Math.PI) / 2 * size;
+  return { x, y };
+}
+
+async function fetchTerrariumElevationGrid({ latitude, longitude, radiusM = 480, spacingM = 30, zoom = 14 } = {}) {
+  const centreLat = Number(latitude), centreLon = Number(longitude);
+  if (!Number.isFinite(centreLat) || !Number.isFinite(centreLon)) throw new Error('Terrain tile query needs latitude and longitude.');
+  const spacing = Math.max(20, Math.min(90, Number(spacingM) || 30));
+  const count = Math.max(9, Math.min(49, Math.round(radiusM * 2 / spacing) + 1));
+  const tileCache = new Map();
+  const fetchTile = async (tileX, tileY) => {
+    const key = `${zoom}/${tileX}/${tileY}`;
+    if (tileCache.has(key)) return tileCache.get(key);
+    const response = await fetch(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${zoom}/${tileX}/${tileY}.png`, { signal: AbortSignal.timeout(20_000) });
+    if (!response.ok) throw new Error(`AWS Terrarium terrain tile failed: ${response.status}`);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const png = PNG.sync.read(buffer);
+    tileCache.set(key, png);
+    return png;
+  };
+  const samples = [];
+  const tileRequests = new Map();
+  for (let row = 0; row < count; row += 1) for (let col = 0; col < count; col += 1) {
+    const northM = radiusM - row * (radiusM * 2 / (count - 1));
+    const eastM = -radiusM + col * (radiusM * 2 / (count - 1));
+    const lat = centreLat + northM / 110540;
+    const lon = centreLon + eastM / (111320 * Math.cos(centreLat * Math.PI / 180));
+    const global = mercatorGlobalPixel(lat, lon, zoom);
+    const tileX = Math.floor(global.x / 256), tileY = Math.floor(global.y / 256);
+    const pixelX = Math.max(0, Math.min(255, Math.floor(global.x - tileX * 256)));
+    const pixelY = Math.max(0, Math.min(255, Math.floor(global.y - tileY * 256)));
+    const key = `${tileX}/${tileY}`;
+    if (!tileRequests.has(key)) tileRequests.set(key, fetchTile(tileX, tileY));
+    samples.push({ latitude: lat, longitude: lon, tileKey: key, pixelX, pixelY });
+  }
+  await Promise.all(tileRequests.values());
+  const decoded = samples.map((sample) => {
+    const png = tileCache.get(`${zoom}/${sample.tileKey}`);
+    const index = (sample.pixelY * png.width + sample.pixelX) * 4;
+    return { latitude: sample.latitude, longitude: sample.longitude, elevationM: terrariumElevationFromRgb(png.data[index], png.data[index + 1], png.data[index + 2]) };
+  }).filter((sample) => Number.isFinite(sample.elevationM));
+  if (decoded.length < 81) throw new Error('Terrain tiles returned too few usable elevation samples.');
+  return {
+    source: `AWS Open Data Mapzen Terrarium DEM (zoom ${zoom}, sampled about ${Math.round(spacing)} m)`,
+    samples: decoded,
+    radiusM,
+    spacingM: spacing,
+    tileCount: tileRequests.size,
+    fresh: true,
+    fetchedAt: new Date().toISOString(),
+    limitations: 'Open global DEM; not local LiDAR, road-crown survey or kerb/breakline terrain.',
+  };
+}
+
 async function geocodeChennai(place) {
   const query = new URLSearchParams({ q: `${place}, Chennai, Tamil Nadu, India`, format: 'jsonv2', limit: '1' });
   const response = await fetch(`https://nominatim.openstreetmap.org/search?${query}`, { headers: { 'User-Agent': 'cFLOWS-SIH-prototype/0.1' } });
@@ -124,16 +188,69 @@ async function fetchKartaViewStreetPhoto({ latitude, longitude, radiusM = 250 })
 }
 
 async function fetchOsmRunoffProxy({ latitude, longitude, radiusM = 220 }) {
-  const query = `[out:json][timeout:18];(way(around:${Math.round(radiusM)},${latitude},${longitude})[building];way(around:${Math.round(radiusM)},${latitude},${longitude})[highway];);out tags geom;`;
-  const response = await fetch('https://overpass.kumi.systems/api/interpreter', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: `data=${encodeURIComponent(query)}` });
-  if (!response.ok) throw new Error(`OpenStreetMap runoff query failed: ${response.status}`);
-  const payload = await response.json();
+  const query = `[out:json][timeout:18];(way(around:${Math.round(radiusM)},${latitude},${longitude})[building];way(around:${Math.round(radiusM)},${latitude},${longitude})[highway];nwr(around:${Math.round(radiusM)},${latitude},${longitude})[amenity~"hospital|clinic|school|college|police|fire_station"];nwr(around:${Math.round(radiusM)},${latitude},${longitude})[natural=water];nwr(around:${Math.round(radiusM)},${latitude},${longitude})[waterway];);out tags center geom;`;
+  const endpoints = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://overpass.private.coffee/api/interpreter'];
+  let payload = null, lastError = null, endpointUsed = null;
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', 'User-Agent': 'cFLOWS-SIH-2026/0.1 urban-flood-research' },
+        body: `data=${encodeURIComponent(query)}`,
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (!response.ok) { lastError = new Error(`${endpoint} returned ${response.status}`); continue; }
+      payload = await response.json(); endpointUsed = endpoint; break;
+    } catch (error) { lastError = error; }
+  }
+  if (!payload) throw new Error(`OpenStreetMap runoff query failed across ${endpoints.length} Overpass endpoints: ${lastError?.message || 'no response'}`);
   const elements = payload.elements || [];
-  const buildings = elements.filter((item) => item.tags?.building).length;
-  const roads = elements.filter((item) => item.tags?.highway).length;
-  // A transparent proxy, not a claimed land-cover survey. More built form
-  // means more impervious runoff in the local scenario catchment.
-  return { source: 'OpenStreetMap buildings + roads', buildings, roads, imperviousPct: Math.max(35, Math.min(92, 35 + buildings * 1.2 + roads * .7)), fresh: true };
+  const toXY = (point) => ({ x: (point.lon - longitude) * 111320 * Math.cos(latitude * Math.PI / 180), y: (point.lat - latitude) * 110540 });
+  const lineLengthM = (geometry = []) => geometry.slice(1).reduce((sum, point, index) => { const a = toXY(geometry[index]), b = toXY(point); return sum + Math.hypot(b.x - a.x, b.y - a.y); }, 0);
+  const polygonAreaM2 = (geometry = []) => {
+    if (geometry.length < 3) return 0;
+    const points = geometry.map(toXY); let twiceArea = 0;
+    for (let index = 0; index < points.length; index += 1) { const a = points[index], b = points[(index + 1) % points.length]; twiceArea += a.x * b.y - b.x * a.y; }
+    return Math.abs(twiceArea) / 2;
+  };
+  const buildings = elements.filter((item) => item.tags?.building);
+  const roads = elements.filter((item) => item.tags?.highway);
+  const pointFor = (item) => {
+    if (Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon))) return { lat: Number(item.lat), lon: Number(item.lon) };
+    if (Number.isFinite(Number(item.center?.lat)) && Number.isFinite(Number(item.center?.lon))) return { lat: Number(item.center.lat), lon: Number(item.center.lon) };
+    const geometry = item.geometry || [];
+    if (!geometry.length) return null;
+    return { lat: geometry.reduce((sum, point) => sum + Number(point.lat), 0) / geometry.length, lon: geometry.reduce((sum, point) => sum + Number(point.lon), 0) / geometry.length };
+  };
+  const geometryFor = (item) => (item.geometry || []).map((point) => ({ lat: Number(point.lat), lon: Number(point.lon) })).filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lon));
+  const roadFeatures = roads.slice(0, 180).map((item) => ({ id: `osm-${item.type}-${item.id}`, name: item.tags?.name || item.tags?.ref || 'Unnamed road', highway: item.tags?.highway || null, geometry: geometryFor(item) })).filter((item) => item.geometry.length >= 2);
+  const buildingFeatures = buildings.slice(0, 260).map((item) => ({ id: `osm-${item.type}-${item.id}`, name: item.tags?.name || 'Mapped building', geometry: geometryFor(item) })).filter((item) => item.geometry.length >= 3);
+  const facilityFeatures = elements.filter((item) => /^(hospital|clinic|school|college|police|fire_station)$/.test(String(item.tags?.amenity || ''))).slice(0, 60).map((item) => {
+    const point = pointFor(item); if (!point) return null;
+    return { id: `osm-${item.type}-${item.id}`, name: item.tags?.name || String(item.tags?.amenity || 'facility').replace(/_/g, ' '), kind: item.tags?.amenity, latitude: point.lat, longitude: point.lon };
+  }).filter(Boolean);
+  const waterFeatures = elements.filter((item) => item.tags?.waterway || item.tags?.natural === 'water' || item.tags?.water).slice(0, 80).map((item) => ({ id: `osm-${item.type}-${item.id}`, name: item.tags?.name || item.tags?.waterway || item.tags?.water || 'Unnamed water feature', kind: item.tags?.waterway || item.tags?.water || item.tags?.natural || 'water', geometry: geometryFor(item), center: pointFor(item) })).filter((item) => item.geometry.length || item.center);
+  const buildingAreaM2 = buildings.reduce((sum, item) => sum + polygonAreaM2(item.geometry), 0);
+  const roadLengthM = roads.reduce((sum, item) => sum + lineLengthM(item.geometry), 0);
+  const sampleAreaM2 = Math.PI * radiusM ** 2;
+  // Road width is explicitly an engineering proxy; using mapped geometry
+  // length/area avoids the old feature-count bias where one road split into
+  // many OSM ways looked more impervious than the same physical road.
+  const assumedRoadWidthM = 7;
+  const mappedImperviousM2 = buildingAreaM2 + roadLengthM * assumedRoadWidthM;
+  const mappedCoveragePct = mappedImperviousM2 / sampleAreaM2 * 100;
+  return {
+    source: 'OpenStreetMap geometry-based runoff proxy',
+    buildings: buildings.length, roads: roads.length, buildingAreaM2, roadLengthM, assumedRoadWidthM,
+    imperviousPct: Math.max(20, Math.min(92, 15 + mappedCoveragePct)),
+    method: 'building footprint area + mapped road length × disclosed 7 m width; not a land-cover survey',
+    buildingFeatures,
+    roadFeatures,
+    facilityFeatures,
+    waterFeatures,
+    endpointUsed,
+    fresh: true,
+  };
 }
 
-module.exports = { fetchGccDrainsForEnvelope, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, fetchOpenMeteoRainfall, fetchCfmForecastRuns, fetchChennaiMarineBoundary, fetchOpenElevation, fetchOpenElevationGrid, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy, GCC_DRAIN_QUERY };
+module.exports = { fetchGccDrainsForEnvelope, fetchGdeltFloodSignals, fetchGoogleNewsFloodSignals, fetchOpenMeteoRainfall, fetchCfmForecastRuns, fetchChennaiMarineBoundary, fetchOpenElevation, fetchOpenElevationGrid, fetchTerrariumElevationGrid, terrariumElevationFromRgb, mercatorGlobalPixel, geocodeChennai, fetchKartaViewStreetPhoto, fetchOsmRunoffProxy, GCC_DRAIN_QUERY };

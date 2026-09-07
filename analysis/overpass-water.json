@@ -1,0 +1,97 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-09-07T14:40:55Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 82874921,
+  "center": {
+    "lat": 12.9472625,
+    "lon": 80.1819239
+  },
+  "tags": {
+    "layer": "-1",
+    "waterway": "drain"
+  }
+},
+{
+  "type": "way",
+  "id": 84099104,
+  "center": {
+    "lat": 12.9584263,
+    "lon": 80.1879699
+  },
+  "tags": {
+    "waterway": "drain"
+  }
+},
+{
+  "type": "way",
+  "id": 102559091,
+  "center": {
+    "lat": 12.9510691,
+    "lon": 80.1962367
+  },
+  "tags": {
+    "layer": "-1",
+    "waterway": "drain"
+  }
+},
+{
+  "type": "way",
+  "id": 102559098,
+  "center": {
+    "lat": 12.9491519,
+    "lon": 80.1848741
+  },
+  "tags": {
+    "layer": "-1",
+    "tunnel": "yes",
+    "waterway": "drain"
+  }
+},
+{
+  "type": "way",
+  "id": 927624558,
+  "center": {
+    "lat": 12.9583559,
+    "lon": 80.1884031
+  },
+  "tags": {
+    "layer": "-1",
+    "tunnel": "culvert",
+    "waterway": "drain"
+  }
+},
+{
+  "type": "way",
+  "id": 1021009992,
+  "center": {
+    "lat": 12.9464128,
+    "lon": 80.1802857
+  },
+  "tags": {
+    "area": "yes",
+    "waterway": "dam"
+  }
+},
+{
+  "type": "way",
+  "id": 1118561504,
+  "center": {
+    "lat": 12.9501112,
+    "lon": 80.1876189
+  },
+  "tags": {
+    "layer": "-1",
+    "waterway": "drain"
+  }
+}
+
+  ]
+}

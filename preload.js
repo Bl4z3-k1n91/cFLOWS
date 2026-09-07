@@ -8,5 +8,10 @@ contextBridge.exposeInMainWorld('neer', {
   ask: (question) => ipcRenderer.invoke('hydrograph:ask', question),
   converse: (message) => ipcRenderer.invoke('hydrograph:converse', message),
   listScenarioRuns: () => ipcRenderer.invoke('hydrograph:list-scenario-runs'),
+  renameScenarioRun: (input) => ipcRenderer.invoke('hydrograph:rename-scenario-run', input),
+  duplicateScenarioRun: (input) => ipcRenderer.invoke('hydrograph:duplicate-scenario-run', input),
+  deleteScenarioRun: (input) => ipcRenderer.invoke('hydrograph:delete-scenario-run', input),
+  importScenarioRun: (payload) => ipcRenderer.invoke('hydrograph:import-scenario-run', payload),
+  geocode: (place) => ipcRenderer.invoke('hydrograph:geocode', { place }),
   inspectScenarioPoint: (input) => ipcRenderer.invoke('hydrograph:inspect-scenario-point', input),
 });

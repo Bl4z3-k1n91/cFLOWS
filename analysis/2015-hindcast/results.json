@@ -1,0 +1,1593 @@
+{
+  "generatedAt": "2026-09-07T14:25:00.580Z",
+  "scope": "2015 historical stress/hindcast screening; not a calibrated validation because raw hourly station files and NRSC inundation polygons are absent locally",
+  "focus": {
+    "latitude": 12.9824,
+    "longitude": 80.209,
+    "label": "Velachery / Taramani pilot"
+  },
+  "forcingNotes": {
+    "localWorkspaceIMD": "contains only 2026-08-19 through 2026-09-01; not used for 2015",
+    "publishedTotalsMm": {
+      "Nungambakkam": 294,
+      "Taramani": 300,
+      "Chembarambakkam": 475
+    },
+    "temporalShape": "hourly shapes manually digitised approximately from Rapid Assessment Figures 3/4 and normalized to published 24-h totals"
+  },
+  "impervious": {
+    "source": "Overture building footprints (local subset)",
+    "buildings": 398,
+    "footprintM2": 59779.6416015625,
+    "imperviousPct": 67.31498122789495,
+    "fresh": true,
+    "coverage": "building-footprint estimate"
+  },
+  "topology": {
+    "completeHydraulicFeatures": 1604,
+    "graphSummary": {
+      "segments": 1604,
+      "nodes": 2598,
+      "inferredLinks": 1092,
+      "highConfidenceCandidates": 632,
+      "geometryLinks": 458,
+      "confirmedLinks": 0,
+      "status": "public-geometry-with-coincident-endpoint-topology"
+    },
+    "nearestSelected": {
+      "id": "gcc-5810",
+      "label": "Velachery AGS Colony, Chennai",
+      "distanceM": 53,
+      "componentSize": 2
+    },
+    "networks": [
+      {
+        "id": "nearest-selected",
+        "links": 1,
+        "distanceM": 53,
+        "labels": [
+          "Velachery AGS Colony, Chennai"
+        ],
+        "selectionSource": "nearest-current-cache",
+        "dimensions": [
+          {
+            "id": "gcc-5810",
+            "rawWidth": 0.9,
+            "rawDepth": 0.9,
+            "correctedWidth": 0.9,
+            "correctedDepth": 0.9,
+            "source": "parsed drain_size field",
+            "closed": true
+          }
+        ]
+      },
+      {
+        "id": "nearest-connected",
+        "links": 2,
+        "distanceM": 53,
+        "labels": [
+          "Velachery AGS Colony, Chennai"
+        ],
+        "selectionSource": "nearest-current-connected-component",
+        "dimensions": [
+          {
+            "id": "gcc-5811",
+            "rawWidth": 0.9,
+            "rawDepth": 0.9,
+            "correctedWidth": 0.9,
+            "correctedDepth": 0.9,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-5810",
+            "rawWidth": 0.9,
+            "rawDepth": 0.9,
+            "correctedWidth": 0.9,
+            "correctedDepth": 0.9,
+            "source": "parsed drain_size field",
+            "closed": true
+          }
+        ]
+      },
+      {
+        "id": "velachery-substantial",
+        "links": 8,
+        "distanceM": 1626,
+        "labels": [
+          "Velachery, Chennai"
+        ],
+        "selectionSource": "pinned-2015-audit-reference",
+        "dimensions": [
+          {
+            "id": "gcc-5975",
+            "rawWidth": 4.93,
+            "rawDepth": 4.93,
+            "correctedWidth": 0.493,
+            "correctedDepth": 0.493,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-6026",
+            "rawWidth": 7.29,
+            "rawDepth": 7.29,
+            "correctedWidth": 0.729,
+            "correctedDepth": 0.729,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-5977",
+            "rawWidth": 1.05,
+            "rawDepth": 1.05,
+            "correctedWidth": 1.054,
+            "correctedDepth": 1.054,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-6014",
+            "rawWidth": 5.73,
+            "rawDepth": 5.73,
+            "correctedWidth": 0.573,
+            "correctedDepth": 0.573,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-6018",
+            "rawWidth": 7.8,
+            "rawDepth": 7.8,
+            "correctedWidth": 0.78,
+            "correctedDepth": 0.78,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-6019",
+            "rawWidth": 8.59,
+            "rawDepth": 8.59,
+            "correctedWidth": 0.859,
+            "correctedDepth": 0.859,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-6047",
+            "rawWidth": 6.27,
+            "rawDepth": 6.27,
+            "correctedWidth": 0.627,
+            "correctedDepth": 0.627,
+            "source": "parsed drain_size field",
+            "closed": true
+          },
+          {
+            "id": "gcc-6015",
+            "rawWidth": 6.27,
+            "rawDepth": 6.27,
+            "correctedWidth": 0.627,
+            "correctedDepth": 0.627,
+            "source": "parsed drain_size field",
+            "closed": true
+          }
+        ]
+      }
+    ]
+  },
+  "rainCases": [
+    {
+      "id": "nungambakkam-observed-shape",
+      "label": "Nungambakkam 2015 observed-shape proxy",
+      "role": "city rainfall forcing",
+      "peakMmHr": 34.1,
+      "reporting24hMm": 293.9,
+      "total48hMm": 327.9
+    },
+    {
+      "id": "taramani-observed-total-proxy",
+      "label": "Taramani 2015 300-mm total using Nungambakkam temporal shape",
+      "role": "pilot-area rainfall proxy",
+      "peakMmHr": 34.8,
+      "reporting24hMm": 299.79999999999995,
+      "total48hMm": 334.50000000000006
+    },
+    {
+      "id": "chembarambakkam-upper-catchment-stress",
+      "label": "Chembarambakkam 2015 upper-catchment stress",
+      "role": "upper-catchment stress only; not local Taramani rainfall",
+      "peakMmHr": 67.5,
+      "reporting24hMm": 474.9000000000001,
+      "total48hMm": 554.1000000000001
+    },
+    {
+      "id": "nungambakkam-uniform-24h",
+      "label": "Nungambakkam 294 mm spread uniformly over 24 h",
+      "role": "temporal-distribution sensitivity",
+      "peakMmHr": 12.25,
+      "reporting24hMm": 294,
+      "total48hMm": 294
+    }
+  ],
+  "swmmRuns": [
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.06,
+      "maxLinkFullDepthRatio": 0.11,
+      "maxNodeDepthM": 0.15,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.002,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__raw-fields__nungambakkam-observed-shape__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.07,
+      "maxLinkFullDepthRatio": 0.11,
+      "maxNodeDepthM": 0.15,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.002,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__production-fixed__nungambakkam-observed-shape__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.06,
+      "maxLinkFullDepthRatio": 0.11,
+      "maxNodeDepthM": 0.15,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.002,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__raw-fields__taramani-observed-total-proxy__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.07,
+      "maxLinkFullDepthRatio": 0.11,
+      "maxNodeDepthM": 0.15,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.002,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__production-fixed__taramani-observed-total-proxy__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.12,
+      "maxLinkFullDepthRatio": 0.16,
+      "maxNodeDepthM": 0.22,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__raw-fields__chembarambakkam-upper-catchment-stress__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.14,
+      "maxLinkFullDepthRatio": 0.16,
+      "maxNodeDepthM": 0.22,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__production-fixed__chembarambakkam-upper-catchment-stress__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.02,
+      "maxLinkFullDepthRatio": 0.06,
+      "maxNodeDepthM": 0.08,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__raw-fields__nungambakkam-uniform-24h__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-selected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 0.554,
+      "links": 1,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.02,
+      "maxLinkFullDepthRatio": 0.06,
+      "maxNodeDepthM": 0.08,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-selected__production-fixed__nungambakkam-uniform-24h__a0p55.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.28,
+      "maxLinkFullDepthRatio": 0.54,
+      "maxNodeDepthM": 0.58,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__nungambakkam-observed-shape__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.34,
+      "maxLinkFullDepthRatio": 0.54,
+      "maxNodeDepthM": 0.58,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__drain-size-closed__nungambakkam-observed-shape__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.29,
+      "maxLinkFullDepthRatio": 0.55,
+      "maxNodeDepthM": 0.58,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__taramani-observed-total-proxy__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.35,
+      "maxLinkFullDepthRatio": 0.55,
+      "maxNodeDepthM": 0.58,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.003
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__drain-size-closed__taramani-observed-total-proxy__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.61,
+      "maxLinkFullDepthRatio": 0.79,
+      "maxNodeDepthM": 0.8,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__chembarambakkam-upper-catchment-stress__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.74,
+      "maxLinkFullDepthRatio": 0.79,
+      "maxNodeDepthM": 0.8,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__drain-size-closed__chembarambakkam-upper-catchment-stress__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.1,
+      "maxLinkFullDepthRatio": 0.34,
+      "maxNodeDepthM": 0.4,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__nungambakkam-uniform-24h__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 1.5,
+      "links": 2,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.12,
+      "maxLinkFullDepthRatio": 0.34,
+      "maxNodeDepthM": 0.4,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__drain-size-closed__nungambakkam-uniform-24h__a1p50.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.38,
+      "maxLinkFullDepthRatio": 0.62,
+      "maxNodeDepthM": 0.65,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__nungambakkam-observed-shape__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.46,
+      "maxLinkFullDepthRatio": 0.62,
+      "maxNodeDepthM": 0.64,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__production-fixed__nungambakkam-observed-shape__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.39,
+      "maxLinkFullDepthRatio": 0.63,
+      "maxNodeDepthM": 0.66,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__taramani-observed-total-proxy__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.47,
+      "maxLinkFullDepthRatio": 0.62,
+      "maxNodeDepthM": 0.65,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__production-fixed__taramani-observed-total-proxy__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.83,
+      "maxLinkFullDepthRatio": 0.91,
+      "maxNodeDepthM": 0.93,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__chembarambakkam-upper-catchment-stress__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 1.01,
+      "maxLinkFullDepthRatio": 0.91,
+      "maxNodeDepthM": 0.92,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__production-fixed__chembarambakkam-upper-catchment-stress__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.14,
+      "maxLinkFullDepthRatio": 0.39,
+      "maxNodeDepthM": 0.44,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__raw-fields__nungambakkam-uniform-24h__a2p05.rpt"
+    },
+    {
+      "networkId": "nearest-connected",
+      "dimensionMode": "production-fixed",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 2.054,
+      "links": 2,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.17,
+      "maxLinkFullDepthRatio": 0.39,
+      "maxNodeDepthM": 0.44,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\nearest-connected__production-fixed__nungambakkam-uniform-24h__a2p05.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0,
+      "maxLinkFullDepthRatio": 0.04,
+      "maxNodeDepthM": 0.44,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.004,
+        "routingPct": -0.013
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__nungambakkam-observed-shape__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.17,
+      "maxLinkFullDepthRatio": 0.59,
+      "maxNodeDepthM": 0.57,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.004,
+        "routingPct": -0.022
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__drain-size-closed__nungambakkam-observed-shape__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0,
+      "maxLinkFullDepthRatio": 0.04,
+      "maxNodeDepthM": 0.44,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.004,
+        "routingPct": -0.013
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__taramani-observed-total-proxy__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.17,
+      "maxLinkFullDepthRatio": 0.59,
+      "maxNodeDepthM": 0.57,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.004,
+        "routingPct": -0.021
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__drain-size-closed__taramani-observed-total-proxy__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0,
+      "maxLinkFullDepthRatio": 0.04,
+      "maxNodeDepthM": 0.46,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.004,
+        "routingPct": -0.007
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__chembarambakkam-upper-catchment-stress__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.34,
+      "maxLinkFullDepthRatio": 0.64,
+      "maxNodeDepthM": 0.7,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.004,
+        "routingPct": -0.005
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__drain-size-closed__chembarambakkam-upper-catchment-stress__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0,
+      "maxLinkFullDepthRatio": 0.04,
+      "maxNodeDepthM": 0.44,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.099
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__nungambakkam-uniform-24h__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "drain-size-closed",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 0.866,
+      "links": 8,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.06,
+      "maxLinkFullDepthRatio": 0.47,
+      "maxNodeDepthM": 0.49,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.02
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__drain-size-closed__nungambakkam-uniform-24h__a0p87.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.02,
+      "maxLinkFullDepthRatio": 0.06,
+      "maxNodeDepthM": 0.52,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__nungambakkam-observed-shape__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "production-fixed",
+      "rainCase": "nungambakkam-observed-shape",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 327.9,
+      "reporting24hMm": 293.9,
+      "peakMmHr": 34.1,
+      "floodedNodes": 1,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0.01,
+      "maxLinkFullFlowRatio": 1.18,
+      "maxLinkFullDepthRatio": 0.87,
+      "maxNodeDepthM": 1.5,
+      "swmmReportedPrecipitationMm": 327.9,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.002
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 1,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [
+        {
+          "node": "J005",
+          "hoursFlooded": 0.01,
+          "maxRateCms": 0.015,
+          "volumeM3": 0,
+          "maxPondedDepthM": 0
+        }
+      ],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__production-fixed__nungambakkam-observed-shape__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.02,
+      "maxLinkFullDepthRatio": 0.06,
+      "maxNodeDepthM": 0.52,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.001
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__taramani-observed-total-proxy__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "production-fixed",
+      "rainCase": "taramani-observed-total-proxy",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 334.5,
+      "reporting24hMm": 299.8,
+      "peakMmHr": 34.8,
+      "floodedNodes": 1,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0.01,
+      "maxLinkFullFlowRatio": 1.21,
+      "maxLinkFullDepthRatio": 0.88,
+      "maxNodeDepthM": 1.5,
+      "swmmReportedPrecipitationMm": 334.5,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": -0.002
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 1,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [
+        {
+          "node": "J005",
+          "hoursFlooded": 0.01,
+          "maxRateCms": 0.014,
+          "volumeM3": 0,
+          "maxPondedDepthM": 0
+        }
+      ],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__production-fixed__taramani-observed-total-proxy__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.05,
+      "maxLinkFullDepthRatio": 0.1,
+      "maxNodeDepthM": 0.6,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__chembarambakkam-upper-catchment-stress__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "production-fixed",
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 554.1,
+      "reporting24hMm": 474.9,
+      "peakMmHr": 67.5,
+      "floodedNodes": 1,
+      "totalFloodVolumeM3": 628,
+      "maxPondedDepthM": 1.629,
+      "maxHoursFlooded": 5.39,
+      "maxLinkFullFlowRatio": 2.27,
+      "maxLinkFullDepthRatio": 1,
+      "maxNodeDepthM": 3.13,
+      "swmmReportedPrecipitationMm": 554.1,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": -0.001,
+        "routingPct": 0.01
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 1,
+        "totalFloodVolumeM3": 628,
+        "maxPondedDepthM": 1.629,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [
+        {
+          "node": "J005",
+          "hoursFlooded": 5.39,
+          "maxRateCms": 0.105,
+          "volumeM3": 628,
+          "maxPondedDepthM": 1.629
+        }
+      ],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__production-fixed__chembarambakkam-upper-catchment-stress__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "raw-fields",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.01,
+      "maxLinkFullDepthRatio": 0.04,
+      "maxNodeDepthM": 0.47,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": -0.011
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__raw-fields__nungambakkam-uniform-24h__a8p13.rpt"
+    },
+    {
+      "networkId": "velachery-substantial",
+      "dimensionMode": "production-fixed",
+      "rainCase": "nungambakkam-uniform-24h",
+      "catchmentAreaHa": 8.126,
+      "links": 8,
+      "totalRain48hMm": 294,
+      "reporting24hMm": 294,
+      "peakMmHr": 12.25,
+      "floodedNodes": 0,
+      "totalFloodVolumeM3": 0,
+      "maxPondedDepthM": 0,
+      "maxHoursFlooded": 0,
+      "maxLinkFullFlowRatio": 0.43,
+      "maxLinkFullDepthRatio": 0.7,
+      "maxNodeDepthM": 0.79,
+      "swmmReportedPrecipitationMm": 294,
+      "warningCount": 0,
+      "continuity": {
+        "runoffPct": 0,
+        "routingPct": -0.002
+      },
+      "solved": true,
+      "productionParser": {
+        "floodedNodes": 0,
+        "totalFloodVolumeM3": 0,
+        "maxPondedDepthM": 0,
+        "agreesWithAuditParser": true
+      },
+      "flooding": [],
+      "reportPath": "analysis\\2015-hindcast\\swmm\\velachery-substantial__production-fixed__nungambakkam-uniform-24h__a8p13.rpt"
+    }
+  ],
+  "rasterRuns": [
+    {
+      "rainCase": "nungambakkam-observed-shape",
+      "drainRemovalMmHr": 26.220530008343058,
+      "maxDepthM": 0.028701294826370537,
+      "maxFloodedAreaM2": 0,
+      "finalStoredM3": 0,
+      "aggregateContinuityErrorPct": 6.3430061198135035e-12,
+      "note": "per-hour continuity is not comparable after the first hour because each call begins with retained water; aggregate continuity closes the 48-h mass balance",
+      "rainfallVolumeM3": 203420.91888809192,
+      "drainedVolumeM3": 197712.03629578176,
+      "boundaryOutflowM3": 5708.882592297266
+    },
+    {
+      "rainCase": "taramani-observed-total-proxy",
+      "drainRemovalMmHr": 26.220530008343058,
+      "maxDepthM": 0.030992721765202125,
+      "maxFloodedAreaM2": 0,
+      "finalStoredM3": 0,
+      "aggregateContinuityErrorPct": 2.450851620468989e-12,
+      "note": "per-hour continuity is not comparable after the first hour because each call begins with retained water; aggregate continuity closes the 48-h mass balance",
+      "rainfallVolumeM3": 207515.3930102464,
+      "drainedVolumeM3": 201527.1602148832,
+      "boundaryOutflowM3": 5988.232795358119
+    },
+    {
+      "rainCase": "chembarambakkam-upper-catchment-stress",
+      "drainRemovalMmHr": 26.220530008343058,
+      "maxDepthM": 0.8382055638478557,
+      "maxFloodedAreaM2": 52897.95918367346,
+      "finalStoredM3": 560.7296186651611,
+      "aggregateContinuityErrorPct": 4.5449902383024e-11,
+      "note": "per-hour continuity is not comparable after the first hour because each call begins with retained water; aggregate continuity closes the 48-h mass balance",
+      "rainfallVolumeM3": 343749.7138027085,
+      "drainedVolumeM3": 309442.2103775775,
+      "boundaryOutflowM3": 33746.773806309575
+    },
+    {
+      "rainCase": "nungambakkam-uniform-24h",
+      "drainRemovalMmHr": 26.220530008343058,
+      "maxDepthM": 0.009008603574713593,
+      "maxFloodedAreaM2": 0,
+      "finalStoredM3": 0,
+      "aggregateContinuityErrorPct": 6.87493226290655e-11,
+      "note": "per-hour continuity is not comparable after the first hour because each call begins with retained water; aggregate continuity closes the 48-h mass balance",
+      "rainfallVolumeM3": 182390.21089703217,
+      "drainedVolumeM3": 178854.47664612028,
+      "boundaryOutflowM3": 3535.734250786498
+    }
+  ],
+  "rasterInputs": {
+    "elevationSource": "Open-Elevation sparse 5×5 terrain samples",
+    "sampleCount": 25,
+    "drainRemovalMmHr": 26.220530008343058,
+    "terrain": {
+      "elevationM": 6,
+      "depressionM": 0,
+      "reliefM": 7,
+      "sampleCount": 25
+    }
+  },
+  "reservoir": {
+    "peakReleaseCusec": 29000,
+    "peakReleaseCms": 821.188551168,
+    "durationHours": 21,
+    "approximateReleasedVolumeM3": 62081854.4683008,
+    "modelRepresentation": "not represented by the local storm-drain SWMM or surface raster"
+  },
+  "validationAvailability": {
+    "nrscRegistryEntries": 2,
+    "extractedInundationPolygons": 0,
+    "observedDepthLabels": 0,
+    "spatialIoUAvailable": false,
+    "depthMAEAvailable": false
+  }
+}

@@ -5,13 +5,19 @@
   "main": "main.js",
   "scripts": {
     "start": "electron . --in-process-gpu",
+    "setup": "cmd.exe /d /c scripts\\setup.cmd",
     "build:swmm": "cmd.exe /d /c scripts\\build-swmm.cmd",
+    "preflight": "node scripts/preflight.js",
+    "smoke": "set CFLOWS_SMOKE_TEST=1&& electron . --in-process-gpu",
+    "sync-server": "node scripts/sync-server.js",
+    "hindcast:2015": "node scripts/hindcast-2015.js",
     "test": "node --test tests/*.test.js"
   },
   "devDependencies": {
     "electron": "^37.2.1"
   },
   "dependencies": {
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "pngjs": "^7.0.0"
   }
 }

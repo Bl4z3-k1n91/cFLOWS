@@ -9,6 +9,7 @@ const assets = {
   copDem: ['data', 'assets', 'cop-dem-glo-30.tif'],
   imerg: ['data', 'imerg', 'imerg-halfhourly.csv'],
   sentinelLabels: ['data', 'calibration', 'sentinel-flood-labels.geojson'],
+  localTerrainSamples: ['data', 'terrain', 'local-elevation-samples.json'],
 };
 const assetPath = (projectRoot, key) => path.join(projectRoot, ...assets[key]);
 const exists = async (file) => { try { await fs.access(file); return true; } catch { return false; } };
@@ -39,7 +40,7 @@ async function estimateOvertureImperviousness({ projectRoot, latitude, longitude
     if (distance > radiusM) continue;
     footprintM2 += polygonAreaM2(feature.geometry.coordinates); buildings += 1;
   }
-  if (!buildings) return { source: 'Overture building footprints (local subset)', buildings: 0, imperviousPct: 35, fresh: false, coverage: 'no buildings found in imported subset' };
+  if (!buildings) return { source: 'Overture building footprints (local subset)', buildings: 0, imperviousPct: null, fresh: false, coverage: 'no local coverage in imported subset' };
   const area = Math.PI * radiusM ** 2;
   return { source: 'Overture building footprints (local subset)', buildings, footprintM2, imperviousPct: Math.max(35, Math.min(94, 28 + footprintM2 / area * 100)), fresh: true, coverage: 'building-footprint estimate' };
 }
@@ -50,10 +51,11 @@ async function getDataStackStatus(projectRoot) {
     files,
     sources: [
       { name: 'GCC storm-water drains', resolution: 'feature-level attributes', access: 'live public GIS', state: 'live' },
-      { name: 'Overture buildings + roads', resolution: 'building/road vectors', access: 'anonymous local subset', state: files.overtureBuildings ? 'ready' : 'import-needed' },
-      { name: 'CartoDEM / Copernicus GLO-30', resolution: 'about 30 m', access: 'local raster import', state: files.cartoDem || files.copDem ? 'ready' : 'import-needed' },
-      { name: 'NASA GPM IMERG', resolution: 'about 10 km / 30 min', access: 'local replay import', state: files.imerg ? 'ready' : 'import-needed' },
+      { name: 'Overture buildings', resolution: 'building footprint vectors', access: 'anonymous local subset', state: files.overtureBuildings ? 'ready' : 'import-needed' },
+      { name: 'CartoDEM / Copernicus GLO-30', resolution: 'about 30 m', access: 'local raster import; raster reader not wired into the current renderer', state: files.cartoDem || files.copDem ? 'present-not-wired' : 'import-needed' },
+      { name: 'NASA GPM IMERG', resolution: 'about 10 km / 30 min', access: 'local replay import; historical replay adapter not wired yet', state: files.imerg ? 'present-not-wired' : 'import-needed' },
       { name: 'Sentinel-1 flood labels', resolution: 'about 10 m event extent', access: 'local label import', state: files.sentinelLabels ? 'ready' : 'import-needed' },
+      { name: 'Reviewed local terrain samples', resolution: 'deployment supplied', access: 'local JSON elevation grid used preferentially by scenarios', state: files.localTerrainSamples ? 'ready' : 'import-needed' },
     ],
   };
 }

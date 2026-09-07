@@ -30,6 +30,7 @@ function localPrediction(segment, context, now) {
   const width = Math.max(.3, Number(segment.widthM || .6));
   const depth = Math.max(.3, Number(segment.depthM || .75));
   const slope = Math.max(.0001, Number(segment.slope || .001));
+  const geometryObserved = segment.widthObserved === true && segment.depthObserved === true && Number.isFinite(segment.invertStartM) && Number.isFinite(segment.invertEndM) && Number(segment.lengthM) > 0;
   const condition = clamp(Number(segment.conditionScore ?? .75));
   const rainfall = clamp(Number(context.rainfallMmHr || 0) / 120);
   const upstream = clamp(Number(segment.upstreamLevelRatio || 0));
@@ -41,8 +42,10 @@ function localPrediction(segment, context, now) {
   const reports = evidenceFromReports(context.reportsBySegment?.[segment.id], now);
   const news = evidenceFromNews(context.newsBySegment?.[segment.id], now);
   const headDifference = clamp(upstream - downstream, -1, 1);
-  const hydraulicCapacityIndex = clamp((width * depth * Math.sqrt(slope) * condition) / .045);
-  const overload = clamp(rainfall - hydraulicCapacityIndex + upstream * .45);
+  const hydraulicCapacityIndex = geometryObserved ? clamp((width * depth * Math.sqrt(slope) * condition) / .045) : null;
+  const overload = geometryObserved
+    ? clamp(rainfall - hydraulicCapacityIndex + upstream * .45)
+    : clamp(rainfall * .55 + upstream * .45);
 
   // Blockage requires the characteristic upstream/downstream split. Sediment
   // and low velocity increase likelihood, while reports corroborate it.
@@ -53,7 +56,8 @@ function localPrediction(segment, context, now) {
   const floodProbability = clamp(
     .33 * blockageProbability + .28 * overload + .14 * lowElevation + .15 * history + .08 * reports + news
   );
-  const confidence = clamp(.25 + .22 * Boolean(context.rainfallSourceFresh) + .22 * Boolean(segment.hasLevelSensor) + .18 * Boolean(segment.hasVelocitySensor) + .13 * (reports > 0 ? 1 : 0));
+  let confidence = clamp(.10 + .18 * Boolean(context.rainfallSourceFresh) + .18 * geometryObserved + .24 * Boolean(segment.hasLevelSensor) + .18 * Boolean(segment.hasVelocitySensor) + .12 * (reports > 0 ? 1 : 0));
+  if (!geometryObserved && !segment.hasLevelSensor && !segment.hasVelocitySensor) confidence = Math.min(confidence, .39);
   const reasons = [];
   if (headDifference > .28) reasons.push('water is higher upstream than downstream');
   if (lowVelocity > .58) reasons.push('flow velocity is unusually low');
@@ -61,13 +65,18 @@ function localPrediction(segment, context, now) {
   if (overload > .25) reasons.push('rainfall exceeds estimated drain headroom');
   if (history > .45) reasons.push('this segment has repeated historical inundation');
   if (reports > .1) reasons.push('recent field reports corroborate surface water');
-  return { id: segment.id, label: segment.label || segment.id, blockageProbability, floodProbability, confidence, overload, reasons, localEvidence: { reports, news, headDifference, hydraulicCapacityIndex } };
+  if (!geometryObserved) reasons.push('drain dimensions or invert levels are incomplete; hydraulic confidence is limited');
+  return {
+    id: segment.id, label: segment.label || segment.id, blockageProbability, floodProbability, confidence, overload, reasons,
+    dataQuality: geometryObserved ? 'observed-drain-geometry' : 'incomplete-drain-geometry',
+    localEvidence: { reports, news, headDifference, hydraulicCapacityIndex, geometryObserved, historicalFloodFrequency: history, hasLevelSensor: Boolean(segment.hasLevelSensor), hasVelocitySensor: Boolean(segment.hasVelocitySensor) },
+  };
 }
 
 function predictDrainageNetwork({ segments, context = {}, now = Date.now() }) {
   const local = new Map(segments.map((segment) => [segment.id, localPrediction(segment, context, now)]));
   const upstreamOf = new Map(segments.map((segment) => [segment.id, []]));
-  for (const segment of segments) for (const downstreamId of segment.downstreamIds || []) if (upstreamOf.has(downstreamId)) upstreamOf.get(downstreamId).push(segment.id);
+  for (const segment of segments) for (const downstreamId of segment.downstreamIds || segment.topology?.geometryDownstreamIds || []) if (upstreamOf.has(downstreamId)) upstreamOf.get(downstreamId).push(segment.id);
   const results = new Map();
   for (const segment of segments) {
     const base = local.get(segment.id);

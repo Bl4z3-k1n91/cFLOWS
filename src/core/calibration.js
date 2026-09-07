@@ -46,6 +46,40 @@ function evaluateHindcasts(rows = []) {
   return { status: 'evaluated-held-out-events', eventCount: usable.length, metrics: { precision: tp + fp ? tp / (tp + fp) : null, recall: tp + fn ? tp / (tp + fn) : null, falseAlarmRate: fp + tn ? fp / (fp + tn) : null, depthMaeM: maeM, depthSampleCount: depthPairs.length, confusion: { tp, fp, tn, fn } }, conclusion: 'Metrics are held-out event results. They do not transfer automatically to unobserved streets.' };
 }
 
+function fitDepthCalibration(rows = []) {
+  const numeric = (value) => value !== '' && value != null && Number.isFinite(Number(value)) ? Number(value) : null;
+  const candidates = rows.map((row) => ({
+    ...row,
+    observed: numeric(row.depth_m ?? row.observed_depth_m),
+    raw: numeric(row.raw_model_depth_m ?? row.predicted_depth_m),
+    split: String(row.split || row.dataset_split || '').toLowerCase(),
+  })).filter((row) => row.observed != null && row.raw != null && row.raw >= 0 && row.observed >= 0);
+  const explicitTrain = candidates.filter((row) => row.split === 'train' || row.split === 'calibration');
+  const explicitHoldout = candidates.filter((row) => row.split === 'holdout' || row.split === 'test' || row.split === 'validation');
+  if (explicitTrain.length < 10 || explicitHoldout.length < 20) return {
+    status: 'blocked-insufficient-train-holdout-depth-events',
+    trainCount: explicitTrain.length,
+    holdoutCount: explicitHoldout.length,
+    parameter: null,
+    metrics: null,
+    conclusion: 'Depth calibration requires at least 10 explicitly labelled training observations and 20 separate held-out observations. Automatic splitting is intentionally not used because event leakage would make the result look better than it is.',
+  };
+  const denominator = explicitTrain.reduce((sum, row) => sum + row.raw ** 2, 0);
+  const scale = denominator > 0 ? explicitTrain.reduce((sum, row) => sum + row.raw * row.observed, 0) / denominator : 1;
+  const boundedScale = Math.max(.35, Math.min(2.5, scale));
+  const errors = explicitHoldout.map((row) => Math.abs(row.raw * boundedScale - row.observed));
+  const maeM = errors.reduce((sum, error) => sum + error, 0) / errors.length;
+  const rmseM = Math.sqrt(explicitHoldout.reduce((sum, row) => sum + (row.raw * boundedScale - row.observed) ** 2, 0) / explicitHoldout.length);
+  return {
+    status: 'calibrated-with-independent-holdout',
+    trainCount: explicitTrain.length,
+    holdoutCount: explicitHoldout.length,
+    parameter: { depthScale: boundedScale },
+    metrics: { depthMaeM: maeM, depthRmseM: rmseM },
+    conclusion: 'One multiplicative depth-scale parameter was fitted on explicitly separated training observations and evaluated on an independent holdout set.',
+  };
+}
+
 function buildHistoricalReplay({ rainfallRows = [], labelRows = [], district = 'Chennai' }) {
   const rainfall = rainfallRows.filter((row) => String(row.District || row.DISTRICT || row.district || '').toLowerCase() === district.toLowerCase());
   const labels = labelRows.filter((row) => String(row.district || row.DISTRICT || district).toLowerCase() === district.toLowerCase());
@@ -57,18 +91,25 @@ function buildHistoricalReplay({ rainfallRows = [], labelRows = [], district = '
   if (!validLabels.length) missing.push('time-matched flood-depth or inundation labels');
   const dailyOnly = rainfall.some((row) => row['Daily Actual'] != null || row['DAILY ACTUAL'] != null);
   const hindcast = evaluateHindcasts(labels);
+  const depthCalibration = fitDepthCalibration(labels);
   if (dailyOnly) missing.push('sub-daily storm hyetographs');
+  if (depthCalibration.status !== 'calibrated-with-independent-holdout') missing.push('separate depth-calibration train and holdout observations');
+  const calibrated = depthCalibration.status === 'calibrated-with-independent-holdout' && !dailyOnly;
   return {
     district, rainfallRecords: rainfall.length, labelCount: validLabels.length, dateRange: dates.length ? { start: dates[0], end: dates.at(-1) } : null,
     rainfallSummary: rainfallValues.length ? { maxDailyMm: Math.max(...rainfallValues), meanDailyMm: rainfallValues.reduce((sum, value) => sum + value, 0) / rainfallValues.length } : null,
-    isCalibrated: hindcast.status === 'evaluated-held-out-events' && !dailyOnly,
-    status: hindcast.status === 'evaluated-held-out-events' && !dailyOnly ? 'evaluated-held-out-events' : 'blocked-insufficient-ground-truth',
+    isCalibrated: calibrated,
+    status: calibrated ? 'calibrated-with-independent-holdout' : 'blocked-insufficient-ground-truth',
     hindcast,
+    depthCalibration,
+    surfaceParameters: calibrated ? depthCalibration.parameter : null,
     missing: [...new Set(missing)],
-    conclusion: validLabels.length
-      ? 'Labels are present, but calibration remains gated until rainfall time resolution matches flood observations.'
-      : 'IMD rainfall alone can support event screening, not flood-depth calibration or accuracy claims.',
+    conclusion: calibrated
+      ? `Depth scale fitted on ${depthCalibration.trainCount} training observations and checked on ${depthCalibration.holdoutCount} held-out observations.`
+      : validLabels.length
+        ? 'Historical labels can support evaluation, but cFLOWS does not call itself depth-calibrated until train/holdout depth observations and sub-daily rainfall are both present.'
+        : 'IMD rainfall alone can support event screening, not flood-depth calibration or accuracy claims.',
   };
 }
 
-module.exports = { parseCsvRows, loadCalibrationInputs, buildHistoricalReplay, evaluateHindcasts };
+module.exports = { parseCsvRows, loadCalibrationInputs, buildHistoricalReplay, evaluateHindcasts, fitDepthCalibration };
